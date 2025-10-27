@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item active">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Inventario de Items</h1>
+
+            <!-- Estadísticas -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-value">245</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #00A859;">220</div>
+                    <div class="stat-label">Disponibles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #FFC107;">20</div>
+                    <div class="stat-label">Prestados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #dc3545;">5</div>
+                    <div class="stat-label">Extraviados</div>
+                </div>
+            </div>
+
+            <!-- Tabs por Categoría -->
+            <div class="tabs" id="inventarioTabsContainer">
+                <div class="tab active" onclick="PanolApp.switchTab('inventarioTabsContainer', 0)">Todos</div>
+                <div class="tab" onclick="PanolApp.switchTab('inventarioTabsContainer', 1)">Herramientas</div>
+                <div class="tab" onclick="PanolApp.switchTab('inventarioTabsContainer', 2)">Instrumentos</div>
+                <div class="tab" onclick="PanolApp.switchTab('inventarioTabsContainer', 3)">EPP</div>
+                <div class="tab" onclick="PanolApp.switchTab('inventarioTabsContainer', 4)">Componentes</div>
+                <div class="tab" onclick="PanolApp.switchTab('inventarioTabsContainer', 5)">Materiales</div>
+            </div>
+
+            <!-- Tab: Todos los Items -->
+            <div class="tab-content active">
+                <!-- Filtros -->
+                <div class="card mb-4">
+                    <h3 style="margin-bottom: 1rem;">Filtros</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Taller</label>
+                            <select id="filtroTaller">
+                                <option value="">Todos</option>
+                                <option value="ELEC">Electrónica</option>
+                                <option value="ELCN">Electricidad</option>
+                                <option value="AUTO">Automatización</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="filtroEstado">
+                                <option value="">Todos</option>
+                                <option value="DISPONIBLE">Disponible</option>
+                                <option value="PRESTADO">Prestado</option>
+                                <option value="EXTRAVIADO">Extraviado</option>
+                                <option value="MANTENIMIENTO">Mantenimiento</option>
+                                <option value="BAJA">Baja</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Condición</label>
+                            <select id="filtroCondicion">
+                                <option value="">Todas</option>
+                                <option value="BUENO">Bueno</option>
+                                <option value="REGULAR">Regular</option>
+                                <option value="MALO">Malo</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="aplicarFiltros()">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="searchInventario" placeholder="Buscar por código o nombre...">
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="PanolApp.exportarTablaCSV('inventarioTable', 'inventario.csv')">📥 Exportar</button>
+                            <button class="btn btn-primary" onclick="PanolApp.openModal('itemModal')">+ Nuevo Item</button>
+                        </div>
+                    </div>
+                    <table id="inventarioTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Taller</th>
+                                <th>Estado</th>
+                                <th>Condición</th>
+                                <th>Valor</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ELEC-HER-ALI-001</strong></td>
+                                <td>Alicate Cortante Stanley AC-150</td>
+                                <td><span class="badge badge-info">Herramientas</span></td>
+                                <td>Electrónica</td>
+                                <td><span class="badge badge-success">DISPONIBLE</span></td>
+                                <td><span class="badge badge-success">BUENO</span></td>
+                                <td>$15.000</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver detalles" onclick="verItem('ELEC-HER-ALI-001')">👁️</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Historial">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ELEC-HER-ALI-002</strong></td>
+                                <td>Alicate Universal Stanley AU-180</td>
+                                <td><span class="badge badge-info">Herramientas</span></td>
+                                <td>Electrónica</td>
+                                <td><span class="badge badge-success">DISPONIBLE</span></td>
+                                <td><span class="badge badge-success">BUENO</span></td>
+                                <td>$18.000</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver detalles" onclick="verItem('ELEC-HER-ALI-002')">👁️</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Historial">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ELEC-INS-MUL-001</strong></td>
+                                <td>Multímetro de Tenaza UNI-T MT-600A</td>
+                                <td><span class="badge badge-warning">Instrumentos</span></td>
+                                <td>Electrónica</td>
+                                <td><span class="badge badge-warning">PRESTADO</span></td>
+                                <td><span class="badge badge-success">BUENO</span></td>
+                                <td>$45.000</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver detalles" onclick="verItem('ELEC-INS-MUL-001')">👁️</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Historial">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ELEC-EPP-GUA-001</strong></td>
+                                <td>Guantes Cabritilla Steelpro GC-M</td>
+                                <td><span class="badge badge-success">EPP</span></td>
+                                <td>Electrónica</td>
+                                <td><span class="badge badge-success">DISPONIBLE</span></td>
+                                <td><span class="badge badge-warning">REGULAR</span></td>
+                                <td>$3.500</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver detalles" onclick="verItem('ELEC-EPP-GUA-001')">👁️</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Historial">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ELEC-HER-BUS-001</strong></td>
+                                <td>Buscapolos Neón Redline BPN-500</td>
+                                <td><span class="badge badge-info">Herramientas</span></td>
+                                <td>Electrónica</td>
+                                <td><span class="badge badge-danger">EXTRAVIADO</span></td>
+                                <td><span class="badge badge-secondary">-</span></td>
+                                <td>$5.000</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver detalles" onclick="verItem('ELEC-HER-BUS-001')">👁️</button>
+                                        <button class="btn-icon" title="Reportar hallazgo">🔍</button>
+                                        <button class="btn-icon" title="Dar de baja">❌</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabs restantes con contenido similar -->
+            <div class="tab-content">
+                <div class="card">
+                    <p>Mostrando solo items de categoría <strong>Herramientas</strong></p>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="card">
+                    <p>Mostrando solo items de categoría <strong>Instrumentos</strong></p>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="card">
+                    <p>Mostrando solo items de categoría <strong>EPP</strong></p>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="card">
+                    <p>Mostrando solo items de categoría <strong>Componentes</strong></p>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="card">
+                    <p>Mostrando solo items de categoría <strong>Materiales</strong></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Nuevo Item -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Item</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('itemModal')">×</button>
+            </div>
+            <form id="itemForm">
+                <div class="form-group">
+                    <label for="itemNombre">Nombre del Item *</label>
+                    <input type="text" id="itemNombre" required maxlength="100" placeholder="Ej: Alicate Cortante">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemModelo">Modelo</label>
+                        <input type="text" id="itemModelo" maxlength="50" placeholder="AC-150">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemMarca">Marca</label>
+                        <input type="text" id="itemMarca" maxlength="50" placeholder="Stanley">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemCategoria">Categoría *</label>
+                        <select id="itemCategoria" required>
+                            <option value="">Seleccione...</option>
+                            <option value="HER">Herramientas</option>
+                            <option value="INS">Instrumentos</option>
+                            <option value="EPP">EPP</option>
+                            <option value="COM">Componentes</option>
+                            <option value="MAT">Materiales</option>
+                            <option value="SEG">Seguridad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemTaller">Taller *</label>
+                        <select id="itemTaller" required>
+                            <option value="">Seleccione...</option>
+                            <option value="ELEC">Electrónica</option>
+                            <option value="ELCN">Electricidad</option>
+                            <option value="AUTO">Automatización</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="itemValor">Valor de Reposición</label>
+                    <input type="number" id="itemValor" min="0" placeholder="15000">
+                </div>
+                <div class="form-group">
+                    <label for="itemCantidad">Cantidad a Registrar</label>
+                    <input type="number" id="itemCantidad" min="1" value="1">
+                    <small style="color: #666;">Se crearán múltiples unidades con códigos únicos</small>
+                </div>
+                <div class="form-group">
+                    <label for="itemCaracteristicas">Características</label>
+                    <textarea id="itemCaracteristicas" rows="3" maxlength="500" placeholder="Descripción detallada del item..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('itemModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ver Detalles Item -->
+    <div id="detalleItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles del Item</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('detalleItemModal')">×</button>
+            </div>
+            <div id="detalleItemContent">
+                <div class="form-row">
+                    <div style="flex: 1;">
+                        <p><strong>Código:</strong> <span id="detalleCodigo">-</span></p>
+                        <p><strong>Nombre:</strong> <span id="detalleNombre">-</span></p>
+                        <p><strong>Modelo:</strong> <span id="detalleModelo">-</span></p>
+                        <p><strong>Marca:</strong> <span id="detalleMarca">-</span></p>
+                    </div>
+                    <div style="flex: 1;">
+                        <p><strong>Categoría:</strong> <span id="detalleCategoria">-</span></p>
+                        <p><strong>Taller:</strong> <span id="detalleTaller">-</span></p>
+                        <p><strong>Estado:</strong> <span id="detalleEstado">-</span></p>
+                        <p><strong>Valor:</strong> <span id="detalleValor">-</span></p>
+                    </div>
+                </div>
+                <hr>
+                <p><strong>Características:</strong></p>
+                <p id="detalleCaracteristicas" style="color: #666;">-</p>
+                <hr>
+                <p><strong>Ubicación Actual:</strong> <span id="detalleUbicacion">-</span></p>
+                <p><strong>Fecha de Adquisición:</strong> <span id="detalleFecha">-</span></p>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="PanolApp.closeModal('detalleItemModal')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        function aplicarFiltros() {
+            const taller = document.getElementById('filtroTaller').value;
+            const estado = document.getElementById('filtroEstado').value;
+            const condicion = document.getElementById('filtroCondicion').value;
+            
+            console.log('Aplicando filtros:', { taller, estado, condicion });
+            PanolApp.showToast('Filtros aplicados', 'success');
+        }
+
+        function verItem(codigo) {
+            // Simulación de datos
+            document.getElementById('detalleCodigo').textContent = codigo;
+            document.getElementById('detalleNombre').textContent = 'Alicate Cortante Stanley';
+            document.getElementById('detalleModelo').textContent = 'AC-150';
+            document.getElementById('detalleMarca').textContent = 'Stanley';
+            document.getElementById('detalleCategoria').textContent = 'Herramientas';
+            document.getElementById('detalleTaller').textContent = 'Electrónica';
+            document.getElementById('detalleEstado').innerHTML = '<span class="badge badge-success">DISPONIBLE</span>';
+            document.getElementById('detalleValor').textContent = '$15.000';
+            document.getElementById('detalleCaracteristicas').textContent = 'Alicate cortante 6 pulgadas, mango ergonómico';
+            document.getElementById('detalleUbicacion').textContent = 'Pañol - Estante A3';
+            document.getElementById('detalleFecha').textContent = '15/03/2024';
+            
+            PanolApp.openModal('detalleItemModal');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            PanolApp.setupTableSearch('searchInventario', 'inventarioTable');
+            
+            document.getElementById('itemForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const cantidad = document.getElementById('itemCantidad').value;
+                PanolApp.showToast(`${cantidad} item(s) registrado(s) exitosamente`, 'success');
+                PanolApp.closeModal('itemModal');
+                this.reset();
+            });
+        });
+    </script>
+    <script src="./assets/js/inventario.js"></script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumnos - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item active">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Gestión de Alumnos</h1>
+
+            <!-- Estadísticas -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-value">120</div>
+                    <div class="stat-label">Total Alumnos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">110</div>
+                    <div class="stat-label">Activos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Inactivos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Egresados</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <h3 style="margin-bottom: 1rem;">Filtros de Búsqueda</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Taller</label>
+                        <select id="filtroTaller">
+                            <option value="">Todos</option>
+                            <option value="ELEC">Electrónica</option>
+                            <option value="ELCN">Electricidad</option>
+                            <option value="AUTO">Automatización</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Curso</label>
+                        <select id="filtroCurso">
+                            <option value="">Todos</option>
+                            <option value="3MA">3° Medio A</option>
+                            <option value="3MB">3° Medio B</option>
+                            <option value="4MA">4° Medio A</option>
+                            <option value="4MB">4° Medio B</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="filtroEstado">
+                            <option value="">Todos</option>
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                            <option value="EGRESADO">Egresado</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="aplicarFiltros()">Aplicar Filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Alumnos -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchAlumnos" placeholder="Buscar por RUT, nombre o apellido...">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="PanolApp.exportarTablaCSV('alumnosTable', 'alumnos.csv')">📥 Exportar</button>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('alumnoModal')">+ Nuevo Alumno</button>
+                    </div>
+                </div>
+                <table id="alumnosTable">
+                    <thead>
+                        <tr>
+                            <th>RUT</th>
+                            <th>Nombre Completo</th>
+                            <th>Email</th>
+                            <th>Curso</th>
+                            <th>Grupo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alumnosTableBody">
+                        <tr>
+                            <td>20.123.456-7</td>
+                            <td><strong>Juan Pérez González</strong></td>
+                            <td>juan.perez@alumno.nocedal.cl</td>
+                            <td>3° Medio A - Electrónica</td>
+                            <td>Grupo 1</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Editar" onclick="editarAlumno('20.123.456-7')">✏️</button>
+                                    <button class="btn-icon" title="Ver historial">📄</button>
+                                    <button class="btn-icon" title="Cambiar grupo">↔️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>20.234.567-8</td>
+                            <td><strong>María González López</strong></td>
+                            <td>maria.gonzalez@alumno.nocedal.cl</td>
+                            <td>3° Medio A - Electrónica</td>
+                            <td>Grupo 1</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Editar" onclick="editarAlumno('20.234.567-8')">✏️</button>
+                                    <button class="btn-icon" title="Ver historial">📄</button>
+                                    <button class="btn-icon" title="Cambiar grupo">↔️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>20.345.678-9</td>
+                            <td><strong>Pedro Rodríguez Muñoz</strong></td>
+                            <td>pedro.rodriguez@alumno.nocedal.cl</td>
+                            <td>3° Medio A - Electrónica</td>
+                            <td>Grupo 1</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Editar" onclick="editarAlumno('20.345.678-9')">✏️</button>
+                                    <button class="btn-icon" title="Ver historial">📄</button>
+                                    <button class="btn-icon" title="Cambiar grupo">↔️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>20.456.789-0</td>
+                            <td><strong>Ana Martínez Silva</strong></td>
+                            <td>ana.martinez@alumno.nocedal.cl</td>
+                            <td>4° Medio A - Electrónica</td>
+                            <td>Grupo 3</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Editar" onclick="editarAlumno('20.456.789-0')">✏️</button>
+                                    <button class="btn-icon" title="Ver historial">📄</button>
+                                    <button class="btn-icon" title="Cambiar grupo">↔️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>19.567.890-1</td>
+                            <td><strong>Carlos Fernández Torres</strong></td>
+                            <td>carlos.fernandez@alumno.nocedal.cl</td>
+                            <td>3° Medio B - Electricidad</td>
+                            <td>Grupo 2</td>
+                            <td><span class="badge badge-warning">INACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Editar" onclick="editarAlumno('19.567.890-1')">✏️</button>
+                                    <button class="btn-icon" title="Ver historial">📄</button>
+                                    <button class="btn-icon" title="Reactivar">🔄</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Nuevo/Editar Alumno -->
+    <div id="alumnoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Alumno</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('alumnoModal')">×</button>
+            </div>
+            <form id="alumnoForm">
+                <div class="form-group">
+                    <label for="alumnoRut">RUT *</label>
+                    <input type="text" id="alumnoRut" required placeholder="12.345.678-9">
+                    <small id="alumnoRutError" style="color: #dc3545; display: none;">RUT inválido</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="alumnoNombres">Nombres *</label>
+                        <input type="text" id="alumnoNombres" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="alumnoApellidos">Apellidos *</label>
+                        <input type="text" id="alumnoApellidos" required maxlength="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="alumnoEmail">Email</label>
+                    <input type="email" id="alumnoEmail" maxlength="100" placeholder="alumno@nocedal.cl">
+                </div>
+                <div class="form-group">
+                    <label for="alumnoTelefono">Teléfono</label>
+                    <input type="tel" id="alumnoTelefono" maxlength="15" placeholder="+56 9 1234 5678">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="alumnoCurso">Curso *</label>
+                        <select id="alumnoCurso" required>
+                            <option value="">Seleccione...</option>
+                            <option value="3MA-ELEC">3° Medio A - Electrónica</option>
+                            <option value="4MA-ELEC">4° Medio A - Electrónica</option>
+                            <option value="3MB-ELCN">3° Medio B - Electricidad</option>
+                            <option value="4MB-AUTO">4° Medio B - Automatización</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="alumnoGrupo">Grupo</label>
+                        <select id="alumnoGrupo">
+                            <option value="">Sin asignar</option>
+                            <option value="1">Grupo 1</option>
+                            <option value="2">Grupo 2</option>
+                            <option value="3">Grupo 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="alumnoAnioIngreso">Año de Ingreso</label>
+                    <input type="number" id="alumnoAnioIngreso" min="2020" max="2025" value="2025">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('alumnoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Alumno</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        function editarAlumno(rut) {
+            console.log('Editar alumno:', rut);
+            // Aquí se cargarían los datos del alumno
+            PanolApp.openModal('alumnoModal');
+            document.querySelector('#alumnoModal .modal-title').textContent = 'Editar Alumno';
+        }
+
+        function aplicarFiltros() {
+            const taller = document.getElementById('filtroTaller').value;
+            const curso = document.getElementById('filtroCurso').value;
+            const estado = document.getElementById('filtroEstado').value;
+            
+            console.log('Aplicando filtros:', { taller, curso, estado });
+            PanolApp.showToast('Filtros aplicados', 'success');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar búsqueda
+            PanolApp.setupTableSearch('searchAlumnos', 'alumnosTable');
+            
+            // Formatear RUT mientras se escribe
+            const rutInput = document.getElementById('alumnoRut');
+            const rutError = document.getElementById('alumnoRutError');
+            
+            rutInput.addEventListener('input', function(e) {
+                e.target.value = PanolApp.formatearRut(e.target.value);
+            });
+
+            // Manejar formulario
+            document.getElementById('alumnoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const rut = rutInput.value;
+                
+                // Validar RUT
+                if (!PanolApp.validarRut(rut)) {
+                    rutError.style.display = 'block';
+                    rutInput.focus();
+                    return;
+                } else {
+                    rutError.style.display = 'none';
+                }
+                
+                PanolApp.showToast('Alumno guardado exitosamente', 'success');
+                PanolApp.closeModal('alumnoModal');
+                this.reset();
+                
+                // Aquí iría la llamada a la API
+            });
+        });
+
+        
+
+
+    </script>
+    <script src="./assets/js/alumnos.js"></script>
+</body>
+</html>

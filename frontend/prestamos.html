@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préstamos - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item active">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Gestión de Préstamos Anuales</h1>
+
+            <!-- Información del Año Escolar -->
+            <div class="card" style="background: linear-gradient(135deg, #0056A3, #00A859); color: white; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">📅 Año Escolar 2025</h3>
+                <div class="stats-row" style="margin: 0;">
+                    <div class="stat-item" style="background-color: rgba(255,255,255,0.2); color: white;">
+                        <div class="stat-value" style="color: white;">01 Marzo</div>
+                        <div class="stat-label" style="color: white;">Inicio</div>
+                    </div>
+                    <div class="stat-item" style="background-color: rgba(255,255,255,0.2); color: white;">
+                        <div class="stat-value" style="color: white;">20 Diciembre</div>
+                        <div class="stat-label" style="color: white;">Fin</div>
+                    </div>
+                    <div class="stat-item" style="background-color: rgba(255,255,255,0.2); color: white;">
+                        <div class="stat-value" style="color: white;">24 / 30</div>
+                        <div class="stat-label" style="color: white;">Activos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <h3 style="margin-bottom: 1rem;">Filtros de Búsqueda</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Taller</label>
+                        <select id="filtroTaller">
+                            <option value="">Todos</option>
+                            <option value="ELEC">Electrónica</option>
+                            <option value="ELCN">Electricidad</option>
+                            <option value="AUTO">Automatización</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="filtroEstado">
+                            <option value="ACTIVO">Activos</option>
+                            <option value="DEVUELTO">Devueltos</option>
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Año</label>
+                        <select id="filtroAnio">
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="aplicarFiltros()">Aplicar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Préstamos -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Préstamos 2025</h3>
+                    <button class="btn btn-success" onclick="PanolApp.openModal('prestamoModal')">+ Nuevo Préstamo Anual</button>
+                </div>
+                <table id="prestamosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Grupo</th>
+                            <th>Caja</th>
+                            <th>Taller</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Autoriza</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>#001</strong></td>
+                            <td>Grupo 1 - 3°A</td>
+                            <td>CAJ-ELEC-001</td>
+                            <td>Electrónica</td>
+                            <td>01/03/2025</td>
+                            <td>20/12/2025</td>
+                            <td>Prof. González</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver detalles" onclick="verDetallePrestamo(1)">👁️</button>
+                                    <button class="btn-icon" title="Ver grupo">👥</button>
+                                    <button class="btn-icon" title="Procesar devolución" onclick="procesarDevolucion(1)">↩️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#002</strong></td>
+                            <td>Grupo 2 - 3°A</td>
+                            <td>CAJ-ELEC-002</td>
+                            <td>Electrónica</td>
+                            <td>01/03/2025</td>
+                            <td>20/12/2025</td>
+                            <td>Prof. González</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver detalles" onclick="verDetallePrestamo(2)">👁️</button>
+                                    <button class="btn-icon" title="Ver grupo">👥</button>
+                                    <button class="btn-icon" title="Procesar devolución" onclick="procesarDevolucion(2)">↩️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#003</strong></td>
+                            <td>Grupo 1 - 3°B</td>
+                            <td>CAJ-ELCN-001</td>
+                            <td>Electricidad</td>
+                            <td>01/03/2025</td>
+                            <td>20/12/2025</td>
+                            <td>Prof. Martínez</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver detalles" onclick="verDetallePrestamo(3)">👁️</button>
+                                    <button class="btn-icon" title="Ver grupo">👥</button>
+                                    <button class="btn-icon" title="Procesar devolución" onclick="procesarDevolucion(3)">↩️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#004</strong></td>
+                            <td>Grupo 2 - 4°A</td>
+                            <td>CAJ-AUTO-003</td>
+                            <td>Automatización</td>
+                            <td>01/03/2025</td>
+                            <td>20/12/2025</td>
+                            <td>Prof. Silva</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver detalles" onclick="verDetallePrestamo(4)">👁️</button>
+                                    <button class="btn-icon" title="Ver grupo">👥</button>
+                                    <button class="btn-icon" title="Procesar devolución" onclick="procesarDevolucion(4)">↩️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#024</strong></td>
+                            <td>Grupo 5 - 4°B</td>
+                            <td>CAJ-ELEC-008</td>
+                            <td>Electrónica</td>
+                            <td>01/03/2025</td>
+                            <td>15/11/2025</td>
+                            <td>Prof. González</td>
+                            <td><span class="badge badge-info">DEVUELTO</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver detalles" onclick="verDetallePrestamo(24)">👁️</button>
+                                    <button class="btn-icon" title="Ver reporte">📄</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Grupos sin Préstamo -->
+            <div class="card" style="border-left: 4px solid #FFC107; margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: #856404;">⚠️ Grupos sin Préstamo Asignado</h3>
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Curso</th>
+                            <th>Taller</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Grupo 8 - 3°A</td>
+                            <td>3° Medio A</td>
+                            <td>Electrónica</td>
+                            <td><button class="btn btn-primary btn-sm" onclick="asignarPrestamoRapido(8)">Asignar Caja</button></td>
+                        </tr>
+                        <tr>
+                            <td>Grupo 9 - 3°A</td>
+                            <td>3° Medio A</td>
+                            <td>Electrónica</td>
+                            <td><button class="btn btn-primary btn-sm" onclick="asignarPrestamoRapido(9)">Asignar Caja</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Nuevo Préstamo -->
+    <div id="prestamoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Préstamo Anual</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('prestamoModal')">×</button>
+            </div>
+            <form id="prestamoForm">
+                <div class="card" style="background-color: #f8f9fa; margin-bottom: 1.5rem;">
+                    <p><strong>ℹ️ Información:</strong></p>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                        El préstamo será desde <strong>01 de Marzo 2025</strong> hasta <strong>20 de Diciembre 2025</strong>
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="prestamoGrupo">Grupo *</label>
+                    <select id="prestamoGrupo" required onchange="cargarCajasDisponibles()">
+                        <option value="">Seleccione un grupo...</option>
+                        <option value="1" data-taller="ELEC">Grupo 1 - 3°A Electrónica</option>
+                        <option value="2" data-taller="ELEC">Grupo 2 - 3°A Electrónica</option>
+                        <option value="3" data-taller="ELCN">Grupo 1 - 3°B Electricidad</option>
+                        <option value="4" data-taller="AUTO">Grupo 1 - 4°A Automatización</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="prestamoCaja">Caja Disponible *</label>
+                    <select id="prestamoCaja" required>
+                        <option value="">Primero seleccione un grupo...</option>
+                    </select>
+                    <small id="cajasDisponiblesInfo" style="color: #666;"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="prestamoDocenteRut">Docente que Autoriza (RUT) *</label>
+                    <input type="text" id="prestamoDocenteRut" required placeholder="12.345.678-9">
+                </div>
+
+                <div class="form-group">
+                    <label for="prestamoObservaciones">Observaciones</label>
+                    <textarea id="prestamoObservaciones" rows="3" placeholder="Observaciones del préstamo..."></textarea>
+                </div>
+
+                <div class="card" style="background-color: #fff3cd; border-left: 4px solid #FFC107;">
+                    <p style="margin: 0; font-size: 0.9rem;">
+                        <strong>⚠️ Importante:</strong> Verifique que la caja esté completa antes de realizar el préstamo.
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('prestamoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar Préstamo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Préstamo -->
+    <div id="detallePrestamoModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalle del Préstamo #<span id="detPrestamoId">-</span></h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('detallePrestamoModal')">×</button>
+            </div>
+            <div>
+                <div class="form-row">
+                    <div style="flex: 1;">
+                        <p><strong>Grupo:</strong> <span id="detGrupo">-</span></p>
+                        <p><strong>Caja:</strong> <span id="detCaja">-</span></p>
+                        <p><strong>Taller:</strong> <span id="detTaller">-</span></p>
+                    </div>
+                    <div style="flex: 1;">
+                        <p><strong>Fecha Inicio:</strong> <span id="detFechaInicio">-</span></p>
+                        <p><strong>Fecha Fin:</strong> <span id="detFechaFin">-</span></p>
+                        <p><strong>Estado:</strong> <span id="detEstado">-</span></p>
+                    </div>
+                </div>
+                <hr>
+                <h4>Integrantes del Grupo</h4>
+                <ul id="detIntegrantes" style="padding-left: 1.5rem;">
+                    <li>Juan Pérez González - Responsable</li>
+                    <li>María González López</li>
+                    <li>Pedro Rodríguez Muñoz</li>
+                </ul>
+                <hr>
+                <p><strong>Docente que Autorizó:</strong> <span id="detDocente">-</span></p>
+                <p><strong>Observaciones:</strong></p>
+                <p id="detObservaciones" style="color: #666;">-</p>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="PanolApp.closeModal('detallePrestamoModal')">Cerrar</button>
+                <button class="btn btn-primary">📥 Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        function aplicarFiltros() {
+            const taller = document.getElementById('filtroTaller').value;
+            const estado = document.getElementById('filtroEstado').value;
+            const anio = document.getElementById('filtroAnio').value;
+            
+            console.log('Aplicando filtros:', { taller, estado, anio });
+            PanolApp.showToast('Filtros aplicados', 'success');
+        }
+
+        function cargarCajasDisponibles() {
+            const grupoSelect = document.getElementById('prestamoGrupo');
+            const cajaSelect = document.getElementById('prestamoCaja');
+            const infoText = document.getElementById('cajasDisponiblesInfo');
+            
+            const selectedOption = grupoSelect.options[grupoSelect.selectedIndex];
+            const taller = selectedOption.getAttribute('data-taller');
+            
+            if (!taller) {
+                cajaSelect.innerHTML = '<option value="">Primero seleccione un grupo...</option>';
+                infoText.textContent = '';
+                return;
+            }
+            
+            // Simular carga de cajas disponibles
+            cajaSelect.innerHTML = `
+                <option value="">Seleccione una caja...</option>
+                <option value="CAJ-${taller}-005">CAJ-${taller}-005 - Disponible</option>
+                <option value="CAJ-${taller}-007">CAJ-${taller}-007 - Disponible</option>
+            `;
+            infoText.textContent = '2 cajas disponibles para este taller';
+        }
+
+        function verDetallePrestamo(id) {
+            document.getElementById('detPrestamoId').textContent = id;
+            document.getElementById('detGrupo').textContent = 'Grupo 1 - 3°A Electrónica';
+            document.getElementById('detCaja').textContent = 'CAJ-ELEC-001';
+            document.getElementById('detTaller').textContent = 'Electrónica';
+            document.getElementById('detFechaInicio').textContent = '01/03/2025';
+            document.getElementById('detFechaFin').textContent = '20/12/2025';
+            document.getElementById('detEstado').innerHTML = '<span class="badge badge-success">ACTIVO</span>';
+            document.getElementById('detDocente').textContent = 'Prof. González (12.345.678-9)';
+            document.getElementById('detObservaciones').textContent = 'Préstamo registrado sin observaciones';
+            
+            PanolApp.openModal('detallePrestamoModal');
+        }
+
+        function procesarDevolucion(id) {
+            if (confirm('¿Desea procesar la devolución de este préstamo?')) {
+                window.location.href = `revision.html?prestamo=${id}`;
+            }
+        }
+
+        function asignarPrestamoRapido(grupoId) {
+            PanolApp.openModal('prestamoModal');
+            // Pre-seleccionar el grupo
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formatear RUT
+            const rutInput = document.getElementById('prestamoDocenteRut');
+            rutInput.addEventListener('input', function(e) {
+                e.target.value = PanolApp.formatearRut(e.target.value);
+            });
+
+            // Manejar formulario
+            document.getElementById('prestamoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const rut = rutInput.value;
+                if (!PanolApp.validarRut(rut)) {
+                    PanolApp.showToast('RUT del docente inválido', 'error');
+                    rutInput.focus();
+                    return;
+                }
+                
+                PanolApp.showToast('Préstamo registrado exitosamente', 'success');
+                PanolApp.closeModal('prestamoModal');
+                this.reset();
+                
+                // Aquí iría la llamada a la API
+            });
+        });
+    </script>
+    <script src="./assets/js/prestamos.js"></script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisión y Devolución - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item active">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Revisión y Devolución de Cajas</h1>
+
+            <!-- Paso 1: Seleccionar Préstamo -->
+            <div class="card" id="paso1">
+                <h3 style="margin-bottom: 1rem;">📋 Paso 1: Seleccionar Préstamo a Revisar</h3>
+                <div class="form-group">
+                    <label for="selectPrestamo">Préstamo Activo</label>
+                    <select id="selectPrestamo" onchange="cargarRevision()">
+                        <option value="">Seleccione un préstamo...</option>
+                        <option value="1" data-grupo="Grupo 1 - 3°A Electrónica" data-caja="CAJ-ELEC-001">
+                            Préstamo #1 - Grupo 1 - 3°A Electrónica - CAJ-ELEC-001
+                        </option>
+                        <option value="2" data-grupo="Grupo 2 - 3°A Electrónica" data-caja="CAJ-ELEC-002">
+                            Préstamo #2 - Grupo 2 - 3°A Electrónica - CAJ-ELEC-002
+                        </option>
+                        <option value="3" data-grupo="Grupo 1 - 3°B Electricidad" data-caja="CAJ-ELCN-001">
+                            Préstamo #3 - Grupo 1 - 3°B Electricidad - CAJ-ELCN-001
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Paso 2: Información del Préstamo -->
+            <div class="card hidden" id="paso2" style="background-color: #f8f9fa; border-left: 4px solid #0056A3;">
+                <h4 style="margin-bottom: 1rem;">📌 Información del Préstamo</h4>
+                <div class="form-row">
+                    <div style="flex: 1;">
+                        <p><strong>Grupo:</strong> <span id="infoGrupo">-</span></p>
+                        <p><strong>Caja:</strong> <span id="infoCaja">-</span></p>
+                        <p><strong>Fecha Préstamo:</strong> <span id="infoFechaPrestamo">-</span></p>
+                    </div>
+                    <div style="flex: 1;">
+                        <p><strong>Integrantes:</strong></p>
+                        <ul id="infoIntegrantes" style="margin: 0; padding-left: 1.5rem;">
+                            <li>-</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 3: Checklist de Revisión -->
+            <div class="hidden" id="paso3">
+                <div class="table-container" style="margin-top: 2rem;">
+                    <div class="table-header">
+                        <h3>✅ Checklist de Items</h3>
+                        <span id="contadorItems" class="badge badge-info">0 de 0 revisados</span>
+                    </div>
+                    <table id="checklistTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;"></th>
+                                <th style="width: 30%;">Item</th>
+                                <th style="width: 15%;">Código Interno</th>
+                                <th style="width: 10%;">¿Presente?</th>
+                                <th style="width: 15%;">Condición</th>
+                                <th style="width: 25%;">Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checklistBody">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Resumen de Revisión -->
+                <div class="card" id="resumenRevision" style="margin-top: 2rem; border-left: 4px solid #00A859;">
+                    <h4 style="margin-bottom: 1rem;">📊 Resumen de Revisión</h4>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-value" id="resumenPresentes">0</div>
+                            <div class="stat-label">Items Presentes</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #dc3545;" id="resumenFaltantes">0</div>
+                            <div class="stat-label">Items Faltantes</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #FFC107;" id="resumenDanados">0</div>
+                            <div class="stat-label">Items Dañados</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Problemas Encontrados -->
+                <div class="card hidden" id="seccionProblemas" style="margin-top: 1rem; border-left: 4px solid #FFC107;">
+                    <h4 style="margin-bottom: 1rem; color: #856404;">⚠️ Problemas Encontrados</h4>
+                    <div id="listaProblemas"></div>
+                </div>
+
+                <!-- Paso 4: Datos de Devolución -->
+                <div class="card" style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">📝 Datos de Devolución</h4>
+                    <div class="form-group">
+                        <label for="docenteRecibe">Docente que Recibe (RUT) *</label>
+                        <input type="text" id="docenteRecibe" required placeholder="12.345.678-9">
+                    </div>
+                    <div class="form-group">
+                        <label for="observacionesDevolucion">Observaciones de Devolución</label>
+                        <textarea id="observacionesDevolucion" rows="3" placeholder="Observaciones generales sobre la devolución..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div style="margin-top: 2rem; text-align: right; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="cancelarRevision()">Cancelar</button>
+                    <button class="btn btn-warning" onclick="guardarBorrador()">💾 Guardar Borrador</button>
+                    <button class="btn btn-success" onclick="finalizarDevolucion()" id="btnFinalizar">
+                        ✅ Finalizar Devolución
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Confirmar Devolución -->
+    <div id="confirmarDevolucionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirmar Devolución</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('confirmarDevolucionModal')">×</button>
+            </div>
+            <div>
+                <p style="margin-bottom: 1rem;">¿Está seguro de finalizar la devolución con los siguientes datos?</p>
+                <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px;">
+                    <p><strong>Items Presentes:</strong> <span id="confPresentes">-</span></p>
+                    <p><strong>Items Faltantes:</strong> <span id="confFaltantes">-</span></p>
+                    <p><strong>Items Dañados:</strong> <span id="confDanados">-</span></p>
+                    <p><strong>Estado Final:</strong> <span id="confEstadoFinal">-</span></p>
+                </div>
+                <div class="card" style="background-color: #fff3cd; border-left: 4px solid #FFC107; margin-top: 1rem;">
+                    <p style="margin: 0;"><strong>⚠️ Esta acción no se puede deshacer</strong></p>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="PanolApp.closeModal('confirmarDevolucionModal')">Cancelar</button>
+                <button class="btn btn-success" onclick="confirmarDevolucionFinal()">Confirmar Devolución</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        let itemsChecklist = [];
+        let estadoRevision = {
+            presentes: 0,
+            faltantes: 0,
+            danados: 0
+        };
+
+        function cargarRevision() {
+            const select = document.getElementById('selectPrestamo');
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (!select.value) {
+                document.getElementById('paso2').classList.add('hidden');
+                document.getElementById('paso3').classList.add('hidden');
+                return;
+            }
+
+            // Mostrar información del préstamo
+            document.getElementById('infoGrupo').textContent = selectedOption.getAttribute('data-grupo');
+            document.getElementById('infoCaja').textContent = selectedOption.getAttribute('data-caja');
+            document.getElementById('infoFechaPrestamo').textContent = '01/03/2025';
+            document.getElementById('infoIntegrantes').innerHTML = `
+                <li>Juan Pérez González (Responsable)</li>
+                <li>María González López</li>
+                <li>Pedro Rodríguez Muñoz</li>
+            `;
+            
+            document.getElementById('paso2').classList.remove('hidden');
+            
+            // Cargar checklist de items
+            cargarChecklistItems();
+            document.getElementById('paso3').classList.remove('hidden');
+            
+            PanolApp.showToast('Préstamo cargado. Puede iniciar la revisión', 'info');
+        }
+
+        function cargarChecklistItems() {
+            itemsChecklist = [
+                { id: 1, nombre: 'Alicate Cortante', codigoInterno: 'ALI-001-01', presente: true, condicion: 'BUENO' },
+                { id: 2, nombre: 'Alicate Universal', codigoInterno: 'ALI-002-01', presente: true, condicion: 'BUENO' },
+                { id: 3, nombre: 'Alicate de Punta', codigoInterno: 'ALI-003-01', presente: true, condicion: 'BUENO' },
+                { id: 4, nombre: 'Kit Destornilladores', codigoInterno: 'DES-001-01', presente: true, condicion: 'BUENO' },
+                { id: 5, nombre: 'Buscapolos', codigoInterno: 'BUS-001-01', presente: true, condicion: 'BUENO' },
+                { id: 6, nombre: 'Multímetro de Tenaza', codigoInterno: 'MUL-001-01', presente: true, condicion: 'BUENO' },
+                { id: 7, nombre: 'Guantes Cabritilla (Par 1)', codigoInterno: 'GUA-001-01', presente: true, condicion: 'REGULAR' },
+                { id: 8, nombre: 'Guantes Cabritilla (Par 2)', codigoInterno: 'GUA-001-02', presente: true, condicion: 'BUENO' },
+                { id: 9, nombre: 'Guantes Cabritilla (Par 3)', codigoInterno: 'GUA-001-03', presente: true, condicion: 'BUENO' },
+            ];
+
+            renderChecklist();
+        }
+
+        function renderChecklist() {
+            const tbody = document.getElementById('checklistBody');
+            tbody.innerHTML = '';
+
+            itemsChecklist.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center;">
+                        <span style="font-size: 1.2rem;" id="icon-${item.id}">⏳</span>
+                    </td>
+                    <td><strong>${item.nombre}</strong></td>
+                    <td><code>${item.codigoInterno}</code></td>
+                    <td style="text-align: center;">
+                        <input type="checkbox" id="presente-${item.id}" onchange="actualizarRevision()" checked>
+                    </td>
+                    <td>
+                        <select id="condicion-${item.id}" onchange="actualizarRevision()">
+                            <option value="BUENO" ${item.condicion === 'BUENO' ? 'selected' : ''}>Bueno</option>
+                            <option value="REGULAR" ${item.condicion === 'REGULAR' ? 'selected' : ''}>Regular</option>
+                            <option value="MALO" ${item.condicion === 'MALO' ? 'selected' : ''}>Malo/Dañado</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" id="obs-${item.id}" placeholder="Observaciones..." style="width: 100%; padding: 0.5rem;">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            actualizarRevision();
+        }
+
+        function actualizarRevision() {
+            let presentes = 0;
+            let faltantes = 0;
+            let danados = 0;
+            let revisados = 0;
+            const problemas = [];
+
+            itemsChecklist.forEach(item => {
+                const presenteCheck = document.getElementById(`presente-${item.id}`);
+                const condicionSelect = document.getElementById(`condicion-${item.id}`);
+                const obsInput = document.getElementById(`obs-${item.id}`);
+                const icon = document.getElementById(`icon-${item.id}`);
+
+                if (presenteCheck && condicionSelect) {
+                    const estaPresente = presenteCheck.checked;
+                    const condicion = condicionSelect.value;
+
+                    if (estaPresente) {
+                        presentes++;
+                        if (condicion === 'MALO') {
+                            danados++;
+                            icon.textContent = '⚠️';
+                            icon.parentElement.parentElement.style.backgroundColor = '#fff3cd';
+                            problemas.push({
+                                item: item.nombre,
+                                tipo: 'DAÑADO',
+                                obs: obsInput.value || 'Item en mal estado'
+                            });
+                        } else if (condicion === 'REGULAR') {
+                            icon.textContent = '⚠️';
+                            icon.parentElement.parentElement.style.backgroundColor = '#fff9e6';
+                        } else {
+                            icon.textContent = '✅';
+                            icon.parentElement.parentElement.style.backgroundColor = '';
+                        }
+                    } else {
+                        faltantes++;
+                        icon.textContent = '❌';
+                        icon.parentElement.parentElement.style.backgroundColor = '#f8d7da';
+                        problemas.push({
+                            item: item.nombre,
+                            tipo: 'FALTANTE',
+                            obs: obsInput.value || 'Item no devuelto'
+                        });
+                    }
+                    revisados++;
+                }
+            });
+
+            // Actualizar resumen
+            document.getElementById('resumenPresentes').textContent = presentes;
+            document.getElementById('resumenFaltantes').textContent = faltantes;
+            document.getElementById('resumenDanados').textContent = danados;
+            document.getElementById('contadorItems').textContent = `${revisados} de ${itemsChecklist.length} revisados`;
+
+            estadoRevision = { presentes, faltantes, danados };
+
+            // Mostrar problemas
+            if (problemas.length > 0) {
+                const seccionProblemas = document.getElementById('seccionProblemas');
+                const listaProblemas = document.getElementById('listaProblemas');
+                seccionProblemas.classList.remove('hidden');
+                
+                listaProblemas.innerHTML = problemas.map(p => `
+                    <div style="padding: 0.75rem; background-color: white; border-radius: 4px; margin-bottom: 0.5rem; border-left: 3px solid ${p.tipo === 'FALTANTE' ? '#dc3545' : '#FFC107'}">
+                        <strong>${p.item}</strong> - ${p.tipo}<br>
+                        <small style="color: #666;">${p.obs}</small>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('seccionProblemas').classList.add('hidden');
+            }
+        }
+
+        function cancelarRevision() {
+            if (confirm('¿Está seguro de cancelar la revisión? Se perderán los datos ingresados.')) {
+                document.getElementById('selectPrestamo').value = '';
+                document.getElementById('paso2').classList.add('hidden');
+                document.getElementById('paso3').classList.add('hidden');
+                PanolApp.showToast('Revisión cancelada', 'info');
+            }
+        }
+
+        function guardarBorrador() {
+            PanolApp.showToast('Borrador guardado exitosamente', 'success');
+        }
+
+        function finalizarDevolucion() {
+            // Validar docente
+            const docenteRut = document.getElementById('docenteRecibe').value;
+            if (!docenteRut || !PanolApp.validarRut(docenteRut)) {
+                PanolApp.showToast('Debe ingresar un RUT válido del docente que recibe', 'error');
+                document.getElementById('docenteRecibe').focus();
+                return;
+            }
+
+            // Mostrar modal de confirmación
+            document.getElementById('confPresentes').textContent = estadoRevision.presentes;
+            document.getElementById('confFaltantes').textContent = estadoRevision.faltantes;
+            document.getElementById('confDanados').textContent = estadoRevision.danados;
+            
+            let estadoFinal = 'DEVUELTO';
+            if (estadoRevision.faltantes > 0 || estadoRevision.danados > 0) {
+                estadoFinal = 'DEVUELTO CON OBSERVACIONES';
+            }
+            document.getElementById('confEstadoFinal').innerHTML = `<span class="badge badge-warning">${estadoFinal}</span>`;
+            
+            PanolApp.openModal('confirmarDevolucionModal');
+        }
+
+        function confirmarDevolucionFinal() {
+            PanolApp.closeModal('confirmarDevolucionModal');
+            
+            // Simular proceso de devolución
+            PanolApp.showToast('Procesando devolución...', 'info');
+            
+            setTimeout(() => {
+                PanolApp.showToast('Devolución registrada exitosamente', 'success');
+                setTimeout(() => {
+                    window.location.href = 'prestamos.html';
+                }, 1500);
+            }, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formatear RUT
+            const rutInput = document.getElementById('docenteRecibe');
+            rutInput.addEventListener('input', function(e) {
+                e.target.value = PanolApp.formatearRut(e.target.value);
+            });
+
+            // Verificar si viene con parámetro de préstamo
+            const urlParams = new URLSearchParams(window.location.search);
+            const prestamoId = urlParams.get('prestamo');
+            if (prestamoId) {
+                document.getElementById('selectPrestamo').value = prestamoId;
+                cargarRevision();
+            }
+        });
+    </script>
+    <script src="./assets/js/revision.js"></script>
+</body>
+</html>

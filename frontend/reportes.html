@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item active">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Reportes y Estadísticas</h1>
+
+            <!-- Selección de Tipo de Reporte -->
+            <div class="cards-grid">
+                <div class="card" onclick="seleccionarReporte('prestamos')" style="cursor: pointer;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">📊</div>
+                    <h3>Reporte de Préstamos</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Préstamos activos y devueltos por taller y período
+                    </p>
+                </div>
+
+                <div class="card" onclick="seleccionarReporte('inventario')" style="cursor: pointer;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">📦</div>
+                    <h3>Reporte de Inventario</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Estado actual del inventario por categoría y taller
+                    </p>
+                </div>
+
+                <div class="card" onclick="seleccionarReporte('problemas')" style="cursor: pointer;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">⚠️</div>
+                    <h3>Items Problemáticos</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Items faltantes, dañados y en proceso de reposición
+                    </p>
+                </div>
+
+                <div class="card" onclick="seleccionarReporte('cumplimiento')" style="cursor: pointer;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">✅</div>
+                    <h3>Cumplimiento por Grupo</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Estadísticas de devoluciones y responsabilidad
+                    </p>
+                </div>
+
+                <div class="card" onclick="seleccionarReporte('estadisticas')" style="cursor: pointer;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">📈</div>
+                    <h3>Estadísticas por Taller</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Métricas generales de uso y estado por taller
+                    </p>
+                </div>
+
+                <div class="card" onclick="seleccionarReporte('historial')" style="cursor: pointer;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">📄</div>
+                    <h3>Historial de Movimientos</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Auditoría de cambios y movimientos del sistema
+                    </p>
+                </div>
+            </div>
+
+            <!-- Área de Generación de Reportes -->
+            <div id="areaReporte" class="hidden">
+                <!-- Filtros del Reporte -->
+                <div class="card" style="margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">⚙️ Configurar Reporte: <span id="tipoReporteNombre">-</span></h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reporteTaller">Taller</label>
+                            <select id="reporteTaller">
+                                <option value="">Todos</option>
+                                <option value="ELEC">Electrónica</option>
+                                <option value="ELCN">Electricidad</option>
+                                <option value="AUTO">Automatización</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporteFechaInicio">Fecha Inicio</label>
+                            <input type="date" id="reporteFechaInicio" value="2025-01-01">
+                        </div>
+                        <div class="form-group">
+                            <label for="reporteFechaFin">Fecha Fin</label>
+                            <input type="date" id="reporteFechaFin" value="2025-12-31">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end; gap: 0.5rem;">
+                            <button class="btn btn-primary" onclick="generarReporte()">🔍 Generar</button>
+                            <button class="btn btn-secondary" onclick="limpiarReporte()">🔄 Limpiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultado del Reporte -->
+                <div id="resultadoReporte" class="table-container hidden" style="margin-top: 2rem;">
+                    <div class="table-header">
+                        <h3 id="tituloReporte">Reporte</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="exportarPDF()">📄 PDF</button>
+                            <button class="btn btn-secondary" onclick="exportarExcel()">📊 Excel</button>
+                            <button class="btn btn-primary" onclick="imprimirReporte()">🖨️ Imprimir</button>
+                        </div>
+                    </div>
+                    <div id="contenidoReporte" style="padding: 2rem;">
+                        <!-- Contenido dinámico del reporte -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reportes Recientes -->
+            <div class="card" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">📋 Reportes Generados Recientemente</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo de Reporte</th>
+                            <th>Usuario</th>
+                            <th>Parámetros</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>20/10/2025 14:30</td>
+                            <td><span class="badge badge-info">Préstamos Activos</span></td>
+                            <td>Prof. González</td>
+                            <td>Taller: Electrónica, Año: 2025</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver">👁️</button>
+                                    <button class="btn-icon" title="Descargar">📥</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>19/10/2025 10:15</td>
+                            <td><span class="badge badge-warning">Items Problemáticos</span></td>
+                            <td>Prof. Martínez</td>
+                            <td>Todos los talleres</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver">👁️</button>
+                                    <button class="btn-icon" title="Descargar">📥</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>18/10/2025 16:45</td>
+                            <td><span class="badge badge-success">Inventario</span></td>
+                            <td>Admin Sistema</td>
+                            <td>Taller: Electricidad</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver">👁️</button>
+                                    <button class="btn-icon" title="Descargar">📥</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        let tipoReporteActual = null;
+
+        function seleccionarReporte(tipo) {
+            tipoReporteActual = tipo;
+            document.getElementById('areaReporte').classList.remove('hidden');
+            
+            const nombres = {
+                'prestamos': 'Préstamos Activos',
+                'inventario': 'Estado de Inventario',
+                'problemas': 'Items Problemáticos',
+                'cumplimiento': 'Cumplimiento por Grupo',
+                'estadisticas': 'Estadísticas por Taller',
+                'historial': 'Historial de Movimientos'
+            };
+            
+            document.getElementById('tipoReporteNombre').textContent = nombres[tipo];
+            document.getElementById('resultadoReporte').classList.add('hidden');
+            
+            // Scroll al área de reporte
+            document.getElementById('areaReporte').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generarReporte() {
+            if (!tipoReporteActual) {
+                PanolApp.showToast('Seleccione un tipo de reporte', 'warning');
+                return;
+            }
+
+            const taller = document.getElementById('reporteTaller').value;
+            const fechaInicio = document.getElementById('reporteFechaInicio').value;
+            const fechaFin = document.getElementById('reporteFechaFin').value;
+
+            PanolApp.showToast('Generando reporte...', 'info');
+
+            // Simular generación de reporte
+            setTimeout(() => {
+                const contenido = generarContenidoReporte(tipoReporteActual, taller, fechaInicio, fechaFin);
+                document.getElementById('contenidoReporte').innerHTML = contenido;
+                document.getElementById('tituloReporte').textContent = `Reporte: ${document.getElementById('tipoReporteNombre').textContent}`;
+                document.getElementById('resultadoReporte').classList.remove('hidden');
+                
+                PanolApp.showToast('Reporte generado exitosamente', 'success');
+                document.getElementById('resultadoReporte').scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+        }
+
+        function generarContenidoReporte(tipo, taller, fechaInicio, fechaFin) {
+            const tallerNombre = taller ? (taller === 'ELEC' ? 'Electrónica' : taller === 'ELCN' ? 'Electricidad' : 'Automatización') : 'Todos';
+            const fechaGeneracion = new Date().toLocaleDateString('es-CL');
+
+            let contenido = `
+                <div style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #eee;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h2 style="color: #0056A3; margin-bottom: 0.5rem;">Sistema de Gestión de Pañol</h2>
+                            <p style="color: #666;">Colegio Técnico Profesional Nocedal</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p><strong>Fecha de Generación:</strong> ${fechaGeneracion}</p>
+                            <p><strong>Usuario:</strong> ${document.getElementById('userName').textContent}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem;">Parámetros del Reporte</h4>
+                    <p><strong>Taller:</strong> ${tallerNombre}</p>
+                    <p><strong>Período:</strong> ${fechaInicio} a ${fechaFin}</p>
+                </div>
+            `;
+
+            switch(tipo) {
+                case 'prestamos':
+                    contenido += `
+                        <h3 style="margin-bottom: 1rem;">Resumen de Préstamos</h3>
+                        <div class="stats-row" style="margin-bottom: 2rem;">
+                            <div class="stat-item">
+                                <div class="stat-value">24</div>
+                                <div class="stat-label">Préstamos Activos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">6</div>
+                                <div class="stat-label">Devueltos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">80%</div>
+                                <div class="stat-label">Tasa de Uso</div>
+                            </div>
+                        </div>
+
+                        <h4>Detalle por Taller</h4>
+                        <table style="width: 100%; margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Taller</th>
+                                    <th>Préstamos Activos</th>
+                                    <th>Devueltos</th>
+                                    <th>Con Problemas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Electrónica</td>
+                                    <td>8</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>Electricidad</td>
+                                    <td>10</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td>Automatización</td>
+                                    <td>6</td>
+                                    <td>4</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+
+                case 'inventario':
+                    contenido += `
+                        <h3 style="margin-bottom: 1rem;">Estado del Inventario</h3>
+                        <div class="stats-row" style="margin-bottom: 2rem;">
+                            <div class="stat-item">
+                                <div class="stat-value">245</div>
+                                <div class="stat-label">Total Items</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #00A859;">220</div>
+                                <div class="stat-label">Disponibles</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #FFC107;">20</div>
+                                <div class="stat-label">Prestados</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #dc3545;">5</div>
+                                <div class="stat-label">Extraviados</div>
+                            </div>
+                        </div>
+
+                        <h4>Distribución por Categoría</h4>
+                        <table style="width: 100%; margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th>Total</th>
+                                    <th>Disponibles</th>
+                                    <th>Prestados</th>
+                                    <th>Extraviados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Herramientas</td>
+                                    <td>90</td>
+                                    <td>78</td>
+                                    <td>10</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>Instrumentos</td>
+                                    <td>30</td>
+                                    <td>25</td>
+                                    <td>5</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td>EPP</td>
+                                    <td>90</td>
+                                    <td>85</td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>Componentes</td>
+                                    <td>25</td>
+                                    <td>22</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>Seguridad</td>
+                                    <td>10</td>
+                                    <td>10</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+
+                case 'problemas':
+                    contenido += `
+                        <h3 style="margin-bottom: 1rem;">Items Problemáticos</h3>
+                        <div class="card" style="background-color: #fff3cd; border-left: 4px solid #FFC107; margin-bottom: 2rem;">
+                            <p style="margin: 0;"><strong>⚠️ Total de items con problemas: 5</strong></p>
+                        </div>
+
+                        <h4>Detalle de Problemas</h4>
+                        <table style="width: 100%; margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Código</th>
+                                    <th>Problema</th>
+                                    <th>Grupo Responsable</th>
+                                    <th>Valor Reposición</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Buscapolos Neón</td>
+                                    <td>ELEC-HER-BUS-001</td>
+                                    <td><span class="badge badge-danger">Extraviado</span></td>
+                                    <td>Grupo 5 - 3°A</td>
+                                    <td>$5.000</td>
+                                    <td><span class="badge badge-warning">Pendiente</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Alicate Universal</td>
+                                    <td>ELEC-HER-ALI-008</td>
+                                    <td><span class="badge badge-warning">Dañado</span></td>
+                                    <td>Grupo 3 - 4°B</td>
+                                    <td>$18.000</td>
+                                    <td><span class="badge badge-warning">En proceso</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Multímetro</td>
+                                    <td>ELEC-INS-MUL-003</td>
+                                    <td><span class="badge badge-danger">Extraviado</span></td>
+                                    <td>Grupo 8 - 4°A</td>
+                                    <td>$45.000</td>
+                                    <td><span class="badge badge-success">Resuelto</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div style="margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+                            <p><strong>Valor Total de Reposición:</strong> $68.000</p>
+                        </div>
+                    `;
+                    break;
+
+                case 'cumplimiento':
+                    contenido += `
+                        <h3 style="margin-bottom: 1rem;">Cumplimiento por Grupo</h3>
+                        <table style="width: 100%; margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Grupo</th>
+                                    <th>Curso</th>
+                                    <th>Préstamos</th>
+                                    <th>Devoluciones OK</th>
+                                    <th>Con Problemas</th>
+                                    <th>% Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Grupo 1 - 3°A</td>
+                                    <td>Electrónica</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td><span class="badge badge-success">100%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Grupo 2 - 3°A</td>
+                                    <td>Electrónica</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td><span class="badge badge-success">100%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Grupo 5 - 3°A</td>
+                                    <td>Electrónica</td>
+                                    <td>1</td>
+                                    <td>0</td>
+                                    <td>1</td>
+                                    <td><span class="badge badge-danger">0%</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Grupo 3 - 4°B</td>
+                                    <td>Automatización</td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                    <td><span class="badge badge-warning">50%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div style="margin-top: 2rem;">
+                            <h4>Estadísticas Generales</h4>
+                            <p>Grupos con 100% cumplimiento: <strong>22 de 30</strong> (73.3%)</p>
+                            <p>Grupos con problemas registrados: <strong>8 de 30</strong> (26.7%)</p>
+                        </div>
+                    `;
+                    break;
+
+                case 'estadisticas':
+                    contenido += `
+                        <h3 style="margin-bottom: 1rem;">Estadísticas por Taller</h3>
+                        <table style="width: 100%; margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Taller</th>
+                                    <th>Cajas Total</th>
+                                    <th>Cajas Prestadas</th>
+                                    <th>Items Total</th>
+                                    <th>Items Extraviados</th>
+                                    <th>% Uso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Electrónica</strong></td>
+                                    <td>10</td>
+                                    <td>8</td>
+                                    <td>90</td>
+                                    <td>2</td>
+                                    <td>80%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Electricidad</strong></td>
+                                    <td>10</td>
+                                    <td>10</td>
+                                    <td>80</td>
+                                    <td>0</td>
+                                    <td>100%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Automatización</strong></td>
+                                    <td>10</td>
+                                    <td>6</td>
+                                    <td>75</td>
+                                    <td>3</td>
+                                    <td>60%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+
+                case 'historial':
+                    contenido += `
+                        <h3 style="margin-bottom: 1rem;">Historial de Movimientos</h3>
+                        <table style="width: 100%; margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Fecha/Hora</th>
+                                    <th>Tipo Movimiento</th>
+                                    <th>Descripción</th>
+                                    <th>Usuario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>20/10/2025 14:30</td>
+                                    <td><span class="badge badge-success">PRÉSTAMO</span></td>
+                                    <td>Préstamo de caja CAJ-ELEC-001 al Grupo 1</td>
+                                    <td>Prof. González</td>
+                                </tr>
+                                <tr>
+                                    <td>20/10/2025 10:15</td>
+                                    <td><span class="badge badge-info">DEVOLUCIÓN</span></td>
+                                    <td>Devolución de caja CAJ-AUTO-005</td>
+                                    <td>Prof. Silva</td>
+                                </tr>
+                                <tr>
+                                    <td>19/10/2025 16:45</td>
+                                    <td><span class="badge badge-warning">CAMBIO_ESTADO</span></td>
+                                    <td>Item ELEC-HER-BUS-001 marcado como EXTRAVIADO</td>
+                                    <td>Admin Sistema</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+            }
+
+            return contenido;
+        }
+
+        function limpiarReporte() {
+            document.getElementById('reporteTaller').value = '';
+            document.getElementById('reporteFechaInicio').value = '2025-01-01';
+            document.getElementById('reporteFechaFin').value = '2025-12-31';
+            document.getElementById('resultadoReporte').classList.add('hidden');
+        }
+
+        function exportarPDF() {
+            PanolApp.showToast('Exportando a PDF...', 'info');
+            setTimeout(() => {
+                PanolApp.showToast('Reporte descargado exitosamente', 'success');
+            }, 1000);
+        }
+
+        function exportarExcel() {
+            PanolApp.showToast('Exportando a Excel...', 'info');
+            setTimeout(() => {
+                PanolApp.showToast('Reporte descargado exitosamente', 'success');
+            }, 1000);
+        }
+
+        function imprimirReporte() {
+            window.print();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar fechas por defecto
+            const hoy = new Date();
+            const inicioAnio = new Date(hoy.getFullYear(), 0, 1);
+            
+            document.getElementById('reporteFechaInicio').value = inicioAnio.toISOString().split('T')[0];
+            document.getElementById('reporteFechaFin').value = hoy.toISOString().split('T')[0];
+        });
+    </script>
+    <script src="./assets/js/reportes.js"></script>
+</body>
+</html>

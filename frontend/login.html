@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Pañol Nocedal</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-logo">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🧰</div>
+                <h1 class="login-title">Sistema de Pañol</h1>
+                <p class="login-subtitle">Colegio Técnico Profesional Nocedal</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginRut">RUT</label>
+                    <input type="text" id="loginRut" placeholder="12.345.678-9" required autocomplete="username">
+                    <small id="rutError" style="color: #dc3545; display: none;">RUT inválido</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="********" required
+                        autocomplete="current-password">
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe" style="margin: 0; font-weight: 400;">Recordar sesión</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Ingresar al Sistema
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 2rem; color: #666; font-size: 0.85rem;">
+                <p>¿Problemas para ingresar?</p>
+                <p>Contactar al administrador del sistema</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="./assets/js/App.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const rutInput = document.getElementById('loginRut');
+            const passwordInput = document.getElementById('loginPassword');
+            const rutError = document.getElementById('rutError');
+
+            const rut = rutInput.value;
+            const password = passwordInput.value;
+
+            console.log('🔐 Intentando login con RUT:', rut);
+
+            // Validar RUT
+            if (!PanolApp.validarRut(rut)) {
+                rutError.style.display = 'block';
+                rutInput.focus();
+                return;
+            } else {
+                rutError.style.display = 'none';
+            }
+
+            // Deshabilitar botón mientras procesa
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Ingresando...';
+
+            try {
+                // Intentar login (ESPERA LA PROMISE)
+                const success = await PanolApp.handleLogin(rut, password);
+
+                console.log('✅ Resultado del login:', success);
+
+                if (success) {
+                    PanolApp.showToast('Ingreso exitoso. Redirigiendo...', 'success');
+
+                    // Verificar que se guardó en localStorage
+                    const savedUser = localStorage.getItem('currentUser');
+                    console.log('💾 Usuario guardado en localStorage:', savedUser ? 'SÍ' : 'NO');
+
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // El error ya lo muestra handleLogin
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Ingresar al Sistema';
+                }
+            } catch (error) {
+                console.error('❌ Error en el proceso de login:', error);
+                PanolApp.showToast('Error inesperado', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Ingresar al Sistema';
+            }
+        });
+
+        // Formatear RUT mientras se escribe
+        document.getElementById('loginRut').addEventListener('input', function (e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const newValue = PanolApp.formatearRut(e.target.value);
+            e.target.value = newValue;
+
+            // Mantener posición del cursor
+            if (newValue.length > oldValue.length) {
+                e.target.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+            }
+        });
+
+        // Verificar si ya hay sesión activa
+        window.addEventListener('load', function () {
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                console.log('✅ Sesión activa encontrada, redirigiendo...');
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+    <!--<script src="./assets/js/login.js"></script>-->
+</body>
+
+</html>

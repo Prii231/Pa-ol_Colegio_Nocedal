@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cajas de Herramientas - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item active">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Gestión de Cajas de Herramientas</h1>
+
+            <!-- Resumen por Taller -->
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Electrónica</div>
+                            <div class="card-value">10</div>
+                        </div>
+                        <div class="card-icon">🧰</div>
+                    </div>
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="font-size: 1.2rem;">8</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Prestadas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="font-size: 1.2rem; color: #00A859;">2</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Disponibles</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Electricidad</div>
+                            <div class="card-value">10</div>
+                        </div>
+                        <div class="card-icon">🧰</div>
+                    </div>
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="font-size: 1.2rem;">10</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Prestadas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="font-size: 1.2rem; color: #dc3545;">0</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Disponibles</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Automatización</div>
+                            <div class="card-value">10</div>
+                        </div>
+                        <div class="card-icon">🧰</div>
+                    </div>
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="font-size: 1.2rem;">6</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Prestadas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="font-size: 1.2rem; color: #00A859;">4</div>
+                            <div class="stat-label" style="font-size: 0.75rem;">Disponibles</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <h3 style="margin-bottom: 1rem;">Filtros</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Taller</label>
+                        <select id="filtroTaller">
+                            <option value="">Todos</option>
+                            <option value="ELEC">Electrónica</option>
+                            <option value="ELCN">Electricidad</option>
+                            <option value="AUTO">Automatización</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="filtroEstado">
+                            <option value="">Todos</option>
+                            <option value="DISPONIBLE">Disponible</option>
+                            <option value="PRESTADO">Prestado</option>
+                            <option value="MANTENIMIENTO">Mantenimiento</option>
+                            <option value="EXTRAVIADO">Extraviado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Completitud</label>
+                        <select id="filtroCompletitud">
+                            <option value="">Todas</option>
+                            <option value="COMPLETA">Completa</option>
+                            <option value="INCOMPLETA">Incompleta</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="aplicarFiltros()">Aplicar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Cajas -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchCajas" placeholder="Buscar caja...">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="verComposicionEstandar()">📋 Composición Estándar</button>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('cajaModal')">+ Nueva Caja</button>
+                    </div>
+                </div>
+                <table id="cajasTable">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>N° Caja</th>
+                            <th>Taller</th>
+                            <th>Curso Asignado</th>
+                            <th>Estado</th>
+                            <th>Completitud</th>
+                            <th>Candado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CAJ-ELEC-001</strong></td>
+                            <td>1</td>
+                            <td>Electrónica</td>
+                            <td>3° Medio A</td>
+                            <td><span class="badge badge-warning">PRESTADO</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%">100%</div>
+                                </div>
+                            </td>
+                            <td>#001</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver contenido" onclick="verContenido('CAJ-ELEC-001')">📦</button>
+                                    <button class="btn-icon" title="Editar">✏️</button>
+                                    <button class="btn-icon" title="Historial">📋</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAJ-ELEC-002</strong></td>
+                            <td>2</td>
+                            <td>Electrónica</td>
+                            <td><span class="badge badge-secondary">Sin asignar</span></td>
+                            <td><span class="badge badge-success">DISPONIBLE</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 90%; background-color: #FFC107;">90%</div>
+                                </div>
+                            </td>
+                            <td>#002</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver contenido" onclick="verContenido('CAJ-ELEC-002')">📦</button>
+                                    <button class="btn-icon" title="Editar">✏️</button>
+                                    <button class="btn-icon" title="Completar">➕</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAJ-ELEC-003</strong></td>
+                            <td>3</td>
+                            <td>Electrónica</td>
+                            <td>3° Medio B</td>
+                            <td><span class="badge badge-warning">PRESTADO</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%">100%</div>
+                                </div>
+                            </td>
+                            <td>#003</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver contenido" onclick="verContenido('CAJ-ELEC-003')">📦</button>
+                                    <button class="btn-icon" title="Editar">✏️</button>
+                                    <button class="btn-icon" title="Historial">📋</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAJ-ELCN-001</strong></td>
+                            <td>1</td>
+                            <td>Electricidad</td>
+                            <td>3° Medio B</td>
+                            <td><span class="badge badge-warning">PRESTADO</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%">100%</div>
+                                </div>
+                            </td>
+                            <td>#011</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver contenido" onclick="verContenido('CAJ-ELCN-001')">📦</button>
+                                    <button class="btn-icon" title="Editar">✏️</button>
+                                    <button class="btn-icon" title="Historial">📋</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAJ-AUTO-001</strong></td>
+                            <td>1</td>
+                            <td>Automatización</td>
+                            <td>4° Medio A</td>
+                            <td><span class="badge badge-warning">PRESTADO</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 95%; background-color: #FFC107;">95%</div>
+                                </div>
+                            </td>
+                            <td>#021</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon" title="Ver contenido" onclick="verContenido('CAJ-AUTO-001')">📦</button>
+                                    <button class="btn-icon" title="Editar">✏️</button>
+                                    <button class="btn-icon" title="Historial">📋</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Nueva Caja -->
+    <div id="cajaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nueva Caja de Herramientas</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('cajaModal')">×</button>
+            </div>
+            <form id="cajaForm">
+                <div class="form-group">
+                    <label for="cajaTaller">Taller *</label>
+                    <select id="cajaTaller" required>
+                        <option value="">Seleccione...</option>
+                        <option value="ELEC">Electrónica Análoga/Digital</option>
+                        <option value="ELCN">Electricidad y Neumática</option>
+                        <option value="AUTO">Automatización</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cajaNumero">Número de Caja *</label>
+                    <input type="number" id="cajaNumero" required min="1" placeholder="1">
+                    <small style="color: #666;">Número correlativo dentro del taller</small>
+                </div>
+                <div class="form-group">
+                    <label for="cajaNombre">Nombre</label>
+                    <input type="text" id="cajaNombre" maxlength="100" placeholder="Ej: Caja Electrónica #1">
+                </div>
+                <div class="form-group">
+                    <label for="cajaCandado">Número de Candado</label>
+                    <input type="text" id="cajaCandado" maxlength="20" placeholder="#001">
+                </div>
+                <div class="form-group">
+                    <label for="cajaUbicacion">Ubicación</label>
+                    <input type="text" id="cajaUbicacion" maxlength="50" placeholder="Pañol - Estante A">
+                </div>
+                <div class="form-group">
+                    <label for="cajaDescripcion">Descripción / Observaciones</label>
+                    <textarea id="cajaDescripcion" rows="3" maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="cajaConItems" checked>
+                        Armar caja con composición estándar
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('cajaModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Crear Caja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ver Contenido -->
+    <div id="contenidoModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Contenido de Caja</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('contenidoModal')">×</button>
+            </div>
+            <div>
+                <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                    <p><strong>Código:</strong> <span id="contCodigo">-</span></p>
+                    <p><strong>Taller:</strong> <span id="contTaller">-</span></p>
+                    <p><strong>Estado:</strong> <span id="contEstado">-</span></p>
+                </div>
+                
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Código Interno</th>
+                            <th>Estado</th>
+                            <th>Condición</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contenidoCajaBody">
+                        <tr>
+                            <td>Alicate Cortante</td>
+                            <td>ALI-001-01</td>
+                            <td><span class="badge badge-success">DISPONIBLE</span></td>
+                            <td><span class="badge badge-success">BUENO</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="PanolApp.closeModal('contenidoModal')">Cerrar</button>
+                <button class="btn btn-primary">📥 Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Composición Estándar -->
+    <div id="composicionModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Composición Estándar por Taller</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('composicionModal')">×</button>
+            </div>
+            <div>
+                <div class="tabs" id="composicionTabsContainer">
+                    <div class="tab active" onclick="PanolApp.switchTab('composicionTabsContainer', 0)">Electrónica</div>
+                    <div class="tab" onclick="PanolApp.switchTab('composicionTabsContainer', 1)">Electricidad</div>
+                    <div class="tab" onclick="PanolApp.switchTab('composicionTabsContainer', 2)">Automatización</div>
+                </div>
+
+                <div class="tab-content active">
+                    <table style="width: 100%; margin-top: 1rem;">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Cantidad</th>
+                                <th>Obligatorio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Alicate Cortante</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Alicate Universal</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Alicate de Punta</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Kit Destornilladores</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Buscapolos</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Multímetro de Tenaza</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Guantes Cabritilla</td>
+                                <td>3</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Antiparras</td>
+                                <td>3</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                            <tr>
+                                <td>Candado con Llave</td>
+                                <td>1</td>
+                                <td><span class="badge badge-success">Sí</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-content">
+                    <p style="padding: 1rem;">Composición para Electricidad y Neumática</p>
+                </div>
+                <div class="tab-content">
+                    <p style="padding: 1rem;">Composición para Automatización</p>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="PanolApp.closeModal('composicionModal')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        function aplicarFiltros() {
+            const taller = document.getElementById('filtroTaller').value;
+            const estado = document.getElementById('filtroEstado').value;
+            const completitud = document.getElementById('filtroCompletitud').value;
+            
+            console.log('Aplicando filtros:', { taller, estado, completitud });
+            PanolApp.showToast('Filtros aplicados', 'success');
+        }
+
+        function verContenido(codigo) {
+            document.getElementById('contCodigo').textContent = codigo;
+            document.getElementById('contTaller').textContent = 'Electrónica';
+            document.getElementById('contEstado').innerHTML = '<span class="badge badge-warning">PRESTADO</span>';
+            PanolApp.openModal('contenidoModal');
+        }
+
+        function verComposicionEstandar() {
+            PanolApp.openModal('composicionModal');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            PanolApp.setupTableSearch('searchCajas', 'cajasTable');
+            
+            document.getElementById('cajaForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const conItems = document.getElementById('cajaConItems').checked;
+                const mensaje = conItems ? 'Caja creada y armada con éxito' : 'Caja creada exitosamente';
+                PanolApp.showToast(mensaje, 'success');
+                PanolApp.closeModal('cajaModal');
+                this.reset();
+            });
+        });
+    </script>
+    <script src="./assets/js/cajas.js"></script>
+</body>
+</html>

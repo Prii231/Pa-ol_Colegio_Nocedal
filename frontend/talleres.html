@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talleres y Cursos - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item active">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Talleres y Cursos</h1>
+            
+            <!-- Tabs -->
+            <div class="tabs" id="talleresTabsContainer">
+                <div class="tab active" onclick="PanolApp.switchTab('talleresTabsContainer', 0)">Talleres</div>
+                <div class="tab" onclick="PanolApp.switchTab('talleresTabsContainer', 1)">Cursos</div>
+                <div class="tab" onclick="PanolApp.switchTab('talleresTabsContainer', 2)">Grupos de Trabajo</div>
+            </div>
+
+            <!-- Tab 1: Talleres -->
+            <div class="tab-content active">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Talleres Registrados</h3>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('tallerModal')">+ Nuevo Taller</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Ubicación</th>
+                                <th>Docente Encargado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="talleresTableBody">
+                            <tr>
+                                <td><strong>ELEC</strong></td>
+                                <td>Electrónica Análoga/Digital</td>
+                                <td>Taller de electrónica análoga y digital</td>
+                                <td>Edificio CAP - Segundo Piso</td>
+                                <td><span class="badge badge-secondary">Por asignar</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar" onclick="editarTaller('ELEC')">✏️</button>
+                                        <button class="btn-icon" title="Ver detalles" onclick="verTaller('ELEC')">👁️</button>
+                                        <button class="btn-icon" title="Asignar docente">👤</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ELCN</strong></td>
+                                <td>Electricidad y Neumática</td>
+                                <td>Taller de electricidad industrial</td>
+                                <td>Edificio CAP - Tercer Piso</td>
+                                <td><span class="badge badge-secondary">Por asignar</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar" onclick="editarTaller('ELCN')">✏️</button>
+                                        <button class="btn-icon" title="Ver detalles" onclick="verTaller('ELCN')">👁️</button>
+                                        <button class="btn-icon" title="Asignar docente">👤</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>AUTO</strong></td>
+                                <td>Automatización</td>
+                                <td>Taller de Automatización</td>
+                                <td>Edificio CAP - Tercer Piso</td>
+                                <td><span class="badge badge-secondary">Por asignar</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar" onclick="editarTaller('AUTO')">✏️</button>
+                                        <button class="btn-icon" title="Ver detalles" onclick="verTaller('AUTO')">👁️</button>
+                                        <button class="btn-icon" title="Asignar docente">👤</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Cursos -->
+            <div class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Cursos 2025</h3>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('cursoModal')">+ Nuevo Curso</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nivel</th>
+                                <th>Letra</th>
+                                <th>Taller</th>
+                                <th>Cantidad Alumnos</th>
+                                <th>Grupos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cursosTableBody">
+                            <tr>
+                                <td><strong>3MA-ELEC</strong></td>
+                                <td>Tercero Medio</td>
+                                <td>A</td>
+                                <td><span class="badge badge-info">Electrónica</span></td>
+                                <td>30</td>
+                                <td>10</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Ver grupos">👥</button>
+                                        <button class="btn-icon" title="Ver alumnos">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>4MA-ELEC</strong></td>
+                                <td>Cuarto Medio</td>
+                                <td>A</td>
+                                <td><span class="badge badge-info">Electrónica</span></td>
+                                <td>30</td>
+                                <td>10</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Ver grupos">👥</button>
+                                        <button class="btn-icon" title="Ver alumnos">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>3MB-ELCN</strong></td>
+                                <td>Tercero Medio</td>
+                                <td>B</td>
+                                <td><span class="badge badge-success">Electricidad</span></td>
+                                <td>30</td>
+                                <td>10</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Ver grupos">👥</button>
+                                        <button class="btn-icon" title="Ver alumnos">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>4MB-AUTO</strong></td>
+                                <td>Cuarto Medio</td>
+                                <td>B</td>
+                                <td><span class="badge badge-warning">Automatización</span></td>
+                                <td>27</td>
+                                <td>9</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                        <button class="btn-icon" title="Ver grupos">👥</button>
+                                        <button class="btn-icon" title="Ver alumnos">📋</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Grupos de Trabajo -->
+            <div class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="searchGrupos" placeholder="Buscar grupo...">
+                        </div>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo Grupo</button>
+                    </div>
+                    <table id="gruposTable">
+                        <thead>
+                            <tr>
+                                <th>N° Grupo</th>
+                                <th>Nombre</th>
+                                <th>Curso</th>
+                                <th>Taller</th>
+                                <th>Integrantes</th>
+                                <th>Estado Préstamo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gruposTableBody">
+                            <tr>
+                                <td>1</td>
+                                <td>Grupo 1 - 3°A Electrónica</td>
+                                <td>3° Medio A</td>
+                                <td>Electrónica</td>
+                                <td>3/3</td>
+                                <td><span class="badge badge-success">Con Préstamo</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver integrantes">👥</button>
+                                        <button class="btn-icon" title="Ver préstamo">📋</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Grupo 2 - 3°A Electrónica</td>
+                                <td>3° Medio A</td>
+                                <td>Electrónica</td>
+                                <td>3/3</td>
+                                <td><span class="badge badge-success">Con Préstamo</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver integrantes">👥</button>
+                                        <button class="btn-icon" title="Ver préstamo">📋</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Grupo 3 - 3°A Electrónica</td>
+                                <td>3° Medio A</td>
+                                <td>Electrónica</td>
+                                <td>3/3</td>
+                                <td><span class="badge badge-warning">Sin Préstamo</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon" title="Ver integrantes">👥</button>
+                                        <button class="btn-icon" title="Asignar préstamo">📋</button>
+                                        <button class="btn-icon" title="Editar">✏️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Nuevo Taller -->
+    <div id="tallerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Taller</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('tallerModal')">×</button>
+            </div>
+            <form id="tallerForm">
+                <div class="form-group">
+                    <label for="tallerCodigo">Código *</label>
+                    <input type="text" id="tallerCodigo" required maxlength="10" placeholder="Ej: ELEC">
+                </div>
+                <div class="form-group">
+                    <label for="tallerNombre">Nombre *</label>
+                    <input type="text" id="tallerNombre" required maxlength="100" placeholder="Nombre del taller">
+                </div>
+                <div class="form-group">
+                    <label for="tallerDescripcion">Descripción</label>
+                    <textarea id="tallerDescripcion" rows="3" maxlength="200" placeholder="Descripción del taller"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tallerUbicacion">Ubicación</label>
+                    <input type="text" id="tallerUbicacion" maxlength="100" placeholder="Ej: Edificio CAP - Segundo Piso">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('tallerModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Taller</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Curso -->
+    <div id="cursoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Curso</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('cursoModal')">×</button>
+            </div>
+            <form id="cursoForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cursoNivel">Nivel *</label>
+                        <select id="cursoNivel" required>
+                            <option value="">Seleccione...</option>
+                            <option value="Tercero Medio">Tercero Medio</option>
+                            <option value="Cuarto Medio">Cuarto Medio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cursoLetra">Letra *</label>
+                        <select id="cursoLetra" required>
+                            <option value="">Seleccione...</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cursoTaller">Taller *</label>
+                    <select id="cursoTaller" required>
+                        <option value="">Seleccione...</option>
+                        <option value="ELEC">Electrónica Análoga/Digital</option>
+                        <option value="ELCN">Electricidad y Neumática</option>
+                        <option value="AUTO">Automatización</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cursoCantidadAlumnos">Cantidad de Alumnos</label>
+                    <input type="number" id="cursoCantidadAlumnos" value="30" min="1" max="45">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('cursoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Curso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Grupo -->
+    <div id="grupoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Grupo de Trabajo</h2>
+                <button class="close-modal" onclick="PanolApp.closeModal('grupoModal')">×</button>
+            </div>
+            <form id="grupoForm">
+                <div class="form-group">
+                    <label for="grupoCurso">Curso *</label>
+                    <select id="grupoCurso" required>
+                        <option value="">Seleccione...</option>
+                        <option value="3MA-ELEC">3° Medio A - Electrónica</option>
+                        <option value="4MA-ELEC">4° Medio A - Electrónica</option>
+                        <option value="3MB-ELCN">3° Medio B - Electricidad</option>
+                        <option value="4MB-AUTO">4° Medio B - Automatización</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="grupoNumero">Número de Grupo *</label>
+                    <input type="number" id="grupoNumero" required min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="grupoNombre">Nombre del Grupo</label>
+                    <input type="text" id="grupoNombre" placeholder="Ej: Grupo 1 - 3°A Electrónica" maxlength="50">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('grupoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Crear Grupo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        // Funciones específicas de la página
+        function editarTaller(codigo) {
+            console.log('Editar taller:', codigo);
+            PanolApp.showToast('Función en desarrollo', 'info');
+        }
+
+        function verTaller(codigo) {
+            console.log('Ver taller:', codigo);
+            PanolApp.showToast('Función en desarrollo', 'info');
+        }
+
+        // Configurar búsqueda en tabla de grupos
+        document.addEventListener('DOMContentLoaded', function() {
+            PanolApp.setupTableSearch('searchGrupos', 'gruposTable');
+            
+            // Manejar formularios
+            document.getElementById('tallerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                PanolApp.showToast('Taller guardado exitosamente', 'success');
+                PanolApp.closeModal('tallerModal');
+                this.reset();
+            });
+
+            document.getElementById('cursoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                PanolApp.showToast('Curso guardado exitosamente', 'success');
+                PanolApp.closeModal('cursoModal');
+                this.reset();
+            });
+
+            document.getElementById('grupoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                PanolApp.showToast('Grupo creado exitosamente', 'success');
+                PanolApp.closeModal('grupoModal');
+                this.reset();
+            });
+        });
+    </script>
+    <script src="./assets/js/talleres.js"></script>
+</body>
+</html>

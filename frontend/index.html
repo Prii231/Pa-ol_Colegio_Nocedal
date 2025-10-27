@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Pañol Nocedal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div>
+                <div class="header-title">Sistema de Gestión de Pañol</div>
+                <div class="header-subtitle">Colegio Técnico Profesional Nocedal</div>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <button class="btn-logout" onclick="PanolApp.logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <a href="index.html" class="menu-item active">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="talleres.html" class="menu-item">
+                    <span>🏭</span>
+                    <span>Talleres y Cursos</span>
+                </a>
+                <a href="alumnos.html" class="menu-item">
+                    <span>👥</span>
+                    <span>Alumnos</span>
+                </a>
+                <a href="inventario.html" class="menu-item">
+                    <span>📦</span>
+                    <span>Inventario</span>
+                </a>
+                <a href="cajas.html" class="menu-item">
+                    <span>🧰</span>
+                    <span>Cajas de Herramientas</span>
+                </a>
+                <a href="prestamos.html" class="menu-item">
+                    <span>📋</span>
+                    <span>Préstamos</span>
+                </a>
+                <a href="revision.html" class="menu-item">
+                    <span>✅</span>
+                    <span>Revisión y Devolución</span>
+                </a>
+                <a href="reportes.html" class="menu-item">
+                    <span>📈</span>
+                    <span>Reportes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="page-title">Dashboard</h1>
+            
+            <!-- Cards de Métricas -->
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Total Cajas</div>
+                            <div class="card-value" id="totalCajas">30</div>
+                        </div>
+                        <div class="card-icon">🧰</div>
+                    </div>
+                    <div class="card-footer">Todas las cajas registradas en el sistema</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Préstamos Activos</div>
+                            <div class="card-value" id="prestamosActivos">24</div>
+                        </div>
+                        <div class="card-icon">📋</div>
+                    </div>
+                    <div class="card-footer">Cajas actualmente en préstamo</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Items Extraviados</div>
+                            <div class="card-value" id="itemsExtraviados" style="color: #dc3545;">5</div>
+                        </div>
+                        <div class="card-icon">⚠️</div>
+                    </div>
+                    <div class="card-footer">Requieren atención urgente</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Cajas Disponibles</div>
+                            <div class="card-value" id="cajasDisponibles" style="color: #00A859;">6</div>
+                        </div>
+                        <div class="card-icon">✅</div>
+                    </div>
+                    <div class="card-footer">Listas para nuevo préstamo</div>
+                </div>
+            </div>
+
+            <!-- Accesos Rápidos -->
+            <div class="card mb-4">
+                <h3 style="margin-bottom: 1rem;">Accesos Rápidos</h3>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="prestamos.html" class="btn btn-primary">+ Nuevo Préstamo</a>
+                    <a href="revision.html" class="btn btn-success">Procesar Devolución</a>
+                    <a href="inventario.html" class="btn btn-warning">Ver Inventario</a>
+                    <a href="reportes.html" class="btn btn-secondary">Generar Reporte</a>
+                </div>
+            </div>
+
+            <!-- Resumen por Taller -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Resumen por Taller</h3>
+                    <span class="badge badge-info">Año 2025</span>
+                </div>
+                <table id="resumenTalleres">
+                    <thead>
+                        <tr>
+                            <th>Taller</th>
+                            <th>Total Cajas</th>
+                            <th>Prestadas</th>
+                            <th>Disponibles</th>
+                            <th>% Uso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong>Electrónica Análoga/Digital</strong><br>
+                                <small style="color: #666;">Edificio CAP - Segundo Piso</small>
+                            </td>
+                            <td>10</td>
+                            <td><span class="badge badge-warning">8</span></td>
+                            <td><span class="badge badge-success">2</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 80%">80%</div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn-icon" title="Ver detalles">👁️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Electricidad y Neumática</strong><br>
+                                <small style="color: #666;">Edificio CAP - Tercer Piso</small>
+                            </td>
+                            <td>10</td>
+                            <td><span class="badge badge-danger">10</span></td>
+                            <td><span class="badge badge-secondary">0</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%; background-color: #dc3545;">100%</div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn-icon" title="Ver detalles">👁️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Automatización</strong><br>
+                                <small style="color: #666;">Edificio CAP - Tercer Piso</small>
+                            </td>
+                            <td>10</td>
+                            <td><span class="badge badge-info">6</span></td>
+                            <td><span class="badge badge-success">4</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%">60%</div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn-icon" title="Ver detalles">👁️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Préstamos Recientes -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Préstamos Recientes</h3>
+                    <a href="prestamos.html" class="btn btn-primary">Ver Todos</a>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Grupo</th>
+                            <th>Caja</th>
+                            <th>Taller</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>15/03/2025</td>
+                            <td>Grupo 1 - 3°A</td>
+                            <td>CAJ-ELEC-001</td>
+                            <td>Electrónica</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                        <tr>
+                            <td>15/03/2025</td>
+                            <td>Grupo 2 - 3°A</td>
+                            <td>CAJ-ELEC-002</td>
+                            <td>Electrónica</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                        <tr>
+                            <td>15/03/2025</td>
+                            <td>Grupo 1 - 3°B</td>
+                            <td>CAJ-ELCN-001</td>
+                            <td>Electricidad</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                        <tr>
+                            <td>14/03/2025</td>
+                            <td>Grupo 3 - 4°A</td>
+                            <td>CAJ-AUTO-005</td>
+                            <td>Automatización</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                        <tr>
+                            <td>14/03/2025</td>
+                            <td>Grupo 5 - 4°B</td>
+                            <td>CAJ-AUTO-007</td>
+                            <td>Automatización</td>
+                            <td><span class="badge badge-success">ACTIVO</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Alertas y Notificaciones -->
+            <div class="card" style="border-left: 4px solid #FFC107;">
+                <h3 style="margin-bottom: 1rem; color: #856404;">⚠️ Alertas del Sistema</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <strong>5 items extraviados</strong> requieren gestión de reposición
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <strong>Electricidad y Neumática</strong> tiene todas sus cajas en préstamo
+                    </li>
+                    <li style="padding: 0.5rem 0;">
+                        <strong>3 cajas</strong> requieren mantenimiento preventivo
+                    </li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensaje</span>
+    </div>
+
+    <script src="../assets/js/App.js"></script>
+    <script>
+        // Cargar datos del dashboard
+        async function cargarDashboard() {
+            try {
+                // Aquí irían las llamadas reales a la API
+                // const data = await PanolApp.fetchAPI('/dashboard/metricas');
+                
+                // Por ahora usamos datos de ejemplo
+                document.getElementById('totalCajas').textContent = '30';
+                document.getElementById('prestamosActivos').textContent = '24';
+                document.getElementById('itemsExtraviados').textContent = '5';
+                document.getElementById('cajasDisponibles').textContent = '6';
+                
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+                PanolApp.showToast('Error al cargar los datos', 'error');
+            }
+        }
+
+        // Inicialización de la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarDashboard();
+            
+            // Actualizar datos cada 5 minutos
+            setInterval(cargarDashboard, 300000);
+        });
+    </script>
+    <script src="./assets/js/dashboard.js"></script>
+</body>
+</html>
