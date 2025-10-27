@@ -55,12 +55,12 @@ async function inicializarDB() {
     try {
         const pool = await oracledb.createPool(dbConfig);
         console.log('✅ Pool de conexiones Oracle creado exitosamente');
-        
+
         // Verificar la conexión
         const connection = await pool.getConnection();
         const result = await connection.execute('SELECT SYSDATE FROM DUAL');
         console.log(`✅ Conexión verificada - Fecha del servidor: ${result.rows[0].SYSDATE}`);
-        
+
         // Verificar que existen los packages
         const packagesResult = await connection.execute(`
             SELECT object_name, status 
@@ -68,7 +68,7 @@ async function inicializarDB() {
             WHERE object_type = 'PACKAGE' 
             AND object_name IN ('PKG_GESTION_PRESTAMOS', 'PKG_INVENTARIO')
         `);
-        
+
         if (packagesResult.rows.length > 0) {
             console.log('✅ Packages PL/SQL encontrados:');
             packagesResult.rows.forEach(pkg => {
@@ -77,7 +77,7 @@ async function inicializarDB() {
         } else {
             console.warn('⚠️  No se encontraron los packages necesarios');
         }
-        
+
         await connection.close();
         return pool;
     } catch (err) {
@@ -92,10 +92,10 @@ async function inicializarDB() {
 inicializarDB()
     .then(pool => {
         app.locals.pool = pool;
-        
+
         // Router principal de la API
         const apiRouter = express.Router();
-        
+
         // Cargar todas las rutas
         apiRouter.use('/dashboard', require('./routes/dashboard')(pool));
         apiRouter.use('/prestamos', require('./routes/prestamos')(pool));
@@ -105,9 +105,9 @@ inicializarDB()
         apiRouter.use('/talleres', require('./routes/talleres')(pool));
         apiRouter.use('/reportes', require('./routes/reportes')(pool));
         apiRouter.use('/revision', require('./routes/revision')(pool));
-        
+
         app.use('/api', apiRouter);
-        
+
         // =============================================
         // HEALTH CHECK
         // =============================================
@@ -116,7 +116,7 @@ inicializarDB()
                 const connection = await pool.getConnection();
                 await connection.execute('SELECT 1 FROM DUAL');
                 await connection.close();
-                
+
                 res.json({
                     status: 'OK',
                     database: 'Connected',
@@ -131,57 +131,62 @@ inicializarDB()
                 });
             }
         });
-        
+
         // =============================================
         // AUTENTICACIÓN
         // =============================================
         app.post('/api/login', async (req, res) => {
             const { rut, password } = req.body;
             let connection;
-            
+
             try {
                 connection = await pool.getConnection();
-                
+
                 // Formatear RUT (eliminar puntos y guión)
                 const rutLimpio = rut.replace(/\./g, '').replace(/-/g, '');
-                
-                // Consultar docente en la base de datos
+
+                console.log('🔐 Intento de login con RUT:', rutLimpio);
+
+                // Consultar docente en la base de datos (TABLA: DOCENTES)
                 const result = await connection.execute(
                     `SELECT DOC_RUT, DOC_NOMBRE, DOC_APELLIDO, DOC_EMAIL
-                     FROM DOCENTE 
-                     WHERE DOC_RUT = :rut AND DOC_ESTADO = 'ACTIVO'`,
+             FROM DOCENTES 
+             WHERE DOC_RUT = :rut AND DOC_ESTADO = 'ACTIVO'`,
                     { rut: rutLimpio }
                 );
-                
-                // Por ahora, cualquier docente activo puede ingresar
-                // En producción, deberías verificar la contraseña
+
+                console.log('📊 Resultados encontrados:', result.rows.length);
+
                 if (result.rows.length > 0) {
                     const usuario = result.rows[0];
+                    console.log('✅ Usuario encontrado:', usuario.DOC_NOMBRE, usuario.DOC_APELLIDO);
+
                     res.status(200).json({
                         success: true,
                         rut: usuario.DOC_RUT,
                         nombre: `${usuario.DOC_NOMBRE} ${usuario.DOC_APELLIDO}`,
                         email: usuario.DOC_EMAIL,
                         rol: 'DOCENTE',
-                        token: 'jwt-token-' + Date.now() // En producción, usar JWT real
+                        token: 'jwt-token-' + Date.now()
                     });
                 } else {
-                    res.status(401).json({ 
+                    console.log('❌ No se encontró el docente');
+                    res.status(401).json({
                         success: false,
-                        message: 'Credenciales incorrectas o usuario inactivo' 
+                        message: 'Credenciales incorrectas o usuario inactivo'
                     });
                 }
             } catch (err) {
-                console.error('Error en login:', err.message);
-                res.status(500).json({ 
+                console.error('❌ Error en login:', err.message);
+                res.status(500).json({
                     success: false,
-                    message: 'Error en el servidor' 
+                    message: 'Error en el servidor: ' + err.message
                 });
             } finally {
                 if (connection) await connection.close();
             }
         });
-        
+
         // =============================================
         // SERVIR FRONTEND
         // =============================================
@@ -189,35 +194,35 @@ inicializarDB()
         app.get('/', (req, res) => {
             res.sendFile(path.join(__dirname, '../frontend/login.html'));
         });
-        
+
         // Todas las demás rutas sirven el frontend
         app.get('*', (req, res) => {
             if (!req.path.startsWith('/api')) {
                 res.sendFile(path.join(__dirname, '../frontend', req.path));
             }
         });
-        
+
         // =============================================
         // MANEJO DE ERRORES
         // =============================================
         // 404 para rutas de API no encontradas
         app.use('/api/*', (req, res) => {
-            res.status(404).json({ 
+            res.status(404).json({
                 success: false,
-                error: 'Endpoint no encontrado' 
+                error: 'Endpoint no encontrado'
             });
         });
-        
+
         // Manejo de errores generales
         app.use((err, req, res, next) => {
             console.error('Error general:', err.stack);
-            res.status(500).json({ 
+            res.status(500).json({
                 success: false,
                 error: 'Error interno del servidor',
                 message: process.env.NODE_ENV === 'development' ? err.message : undefined
             });
         });
-        
+
         // =============================================
         // INICIAR SERVIDOR
         // =============================================
@@ -231,7 +236,7 @@ inicializarDB()
             console.log(`   📅 Fecha:    ${new Date().toLocaleString('es-CL')}`);
             console.log('   ========================================\n');
         });
-        
+
         // =============================================
         // CIERRE GRACEFUL
         // =============================================
@@ -246,10 +251,10 @@ inicializarDB()
                 process.exit(1);
             }
         };
-        
+
         process.on('SIGTERM', shutdown);
         process.on('SIGINT', shutdown);
-        
+
     })
     .catch(err => {
         console.error('❌ Error fatal al inicializar el servidor:', err.message);
