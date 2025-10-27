@@ -53,14 +53,21 @@ function renderTalleresTable() {
     `).join('');
 }
 
-// Crear/Actualizar taller
+// Crear/Actualizar taller - CORREGIDO: Lee valores directamente del DOM
 async function guardarTaller(formData) {
+    // Leer valores directamente del DOM por ID
     const taller = {
-        tal_codigo: formData.get('tallerCodigo'),
-        tal_nombre: formData.get('tallerNombre'),
-        tal_descripcion: formData.get('tallerDescripcion'),
-        tal_ubicacion: formData.get('tallerUbicacion')
+        tal_codigo: document.getElementById('tallerCodigo').value.trim(),
+        tal_nombre: document.getElementById('tallerNombre').value.trim(),
+        tal_descripcion: document.getElementById('tallerDescripcion').value.trim(),
+        tal_ubicacion: document.getElementById('tallerUbicacion').value.trim()
     };
+    
+    // Validar campos requeridos
+    if (!taller.tal_codigo || !taller.tal_nombre) {
+        PanolApp.showToast('Código y Nombre son obligatorios', 'error');
+        return;
+    }
     
     try {
         const isEdit = talleresData.some(t => t.tal_codigo === taller.tal_codigo);
@@ -159,19 +166,28 @@ function renderCursosTable() {
     `).join('');
 }
 
-// Guardar curso
+// Guardar curso - CORREGIDO: Lee valores directamente del DOM
 async function guardarCurso(formData) {
-    const nivel = formData.get('cursoNivel');
-    const letra = formData.get('cursoLetra');
+    // Leer valores directamente del DOM por ID
+    const nivel = document.getElementById('cursoNivel').value;
+    const letra = document.getElementById('cursoLetra').value.trim();
+    const tallerCodigo = document.getElementById('cursoTaller').value;
+    const cantidadAlumnos = document.getElementById('cursoCantidadAlumnos').value || 30;
     const anio = new Date().getFullYear();
     
+    // Validar campos requeridos
+    if (!nivel || !letra || !tallerCodigo) {
+        PanolApp.showToast('Nivel, Letra y Taller son obligatorios', 'error');
+        return;
+    }
+    
     const curso = {
-        cur_codigo: `${nivel === 'Tercero Medio' ? '3M' : '4M'}${letra}-${formData.get('cursoTaller')}`,
+        cur_codigo: `${nivel === 'Tercero Medio' ? '3M' : '4M'}${letra}-${tallerCodigo}`,
         cur_nivel: nivel,
         cur_letra: letra,
         cur_anio: anio,
-        tal_codigo: formData.get('cursoTaller'),
-        cur_cantidad_alumnos: formData.get('cursoCantidadAlumnos') || 30
+        tal_codigo: tallerCodigo,
+        cur_cantidad_alumnos: cantidadAlumnos
     };
     
     try {
@@ -286,12 +302,23 @@ function renderGruposTable() {
     `).join('');
 }
 
-// Guardar grupo
+// Guardar grupo - CORREGIDO: Lee valores directamente del DOM
 async function guardarGrupo(formData) {
+    // Leer valores directamente del DOM por ID
+    const grupoNumero = document.getElementById('grupoNumero').value;
+    const grupoNombre = document.getElementById('grupoNombre').value.trim();
+    const grupoCurso = document.getElementById('grupoCurso').value;
+    
+    // Validar campos requeridos
+    if (!grupoNumero || !grupoNombre || !grupoCurso) {
+        PanolApp.showToast('Todos los campos son obligatorios', 'error');
+        return;
+    }
+    
     const grupo = {
-        gru_numero: formData.get('grupoNumero'),
-        gru_nombre: formData.get('grupoNombre'),
-        cur_codigo: formData.get('grupoCurso'),
+        gru_numero: grupoNumero,
+        gru_nombre: grupoNombre,
+        cur_codigo: grupoCurso,
         gru_anio: new Date().getFullYear(),
         gru_estado: 'ACTIVO'
     };
@@ -391,13 +418,12 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarCursos();
     cargarGrupos();
     
-    // Event listeners de formularios
+    // Event listeners de formularios - CORREGIDO
     const tallerForm = document.getElementById('tallerForm');
     if (tallerForm) {
         tallerForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            guardarTaller(formData);
+            guardarTaller(); // Ya no necesita formData como parámetro
         });
     }
     
@@ -405,8 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cursoForm) {
         cursoForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            guardarCurso(formData);
+            guardarCurso(); // Ya no necesita formData como parámetro
         });
     }
     
@@ -414,8 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (grupoForm) {
         grupoForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            guardarGrupo(formData);
+            guardarGrupo(); // Ya no necesita formData como parámetro
         });
     }
     

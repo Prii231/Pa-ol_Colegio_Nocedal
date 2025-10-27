@@ -19,11 +19,11 @@ module.exports = (pool) => {
             
             const result = await connection.execute(
                 `SELECT 
-                    TAL_CODIGO,
-                    TAL_NOMBRE,
-                    TAL_DESCRIPCION,
-                    TAL_UBICACION,
-                    TAL_DOCENTE_ENCARGADO
+                    TAL_CODIGO as tal_codigo,
+                    TAL_NOMBRE as tal_nombre,
+                    TAL_DESCRIPCION as tal_descripcion,
+                    TAL_UBICACION as tal_ubicacion,
+                    TAL_DOCENTE_ENCARGADO as tal_docente_encargado
                  FROM TALLERES
                  ORDER BY TAL_NOMBRE`
             );

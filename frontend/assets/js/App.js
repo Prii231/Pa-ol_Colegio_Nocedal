@@ -311,10 +311,15 @@ function exportarTablaCSV(tableId, filename = 'datos.csv') {
 }
 
 // =============================================
-// LLAMADAS A LA API
+// LLAMADAS A LA API - VERSIÓN MEJORADA
 // =============================================
 
 async function fetchAPI(endpoint, method = 'GET', data = null) {
+    console.log('🔵 fetchAPI llamado:');
+    console.log('  - Endpoint:', endpoint);
+    console.log('  - Method:', method);
+    console.log('  - Data:', data);
+    
     const options = {
         method: method,
         headers: {
@@ -329,12 +334,25 @@ async function fetchAPI(endpoint, method = 'GET', data = null) {
     
     if (data && (method === 'POST' || method === 'PUT')) {
         options.body = JSON.stringify(data);
+        console.log('  - Body (JSON):', options.body);
     }
     
     try {
+        console.log('🔄 Enviando request a:', appState.apiUrl + endpoint);
         const response = await fetch(appState.apiUrl + endpoint, options);
+        console.log('📡 Response status:', response.status);
         
         if (!response.ok) {
+            // Intentar leer el mensaje de error del backend
+            let errorMessage = `Error HTTP: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                console.error('❌ Error del backend:', errorData);
+                errorMessage = errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                console.error('❌ No se pudo parsear el error del backend');
+            }
+            
             if (response.status === 401) {
                 // Token expirado o inválido
                 showToast('Sesión expirada. Por favor, inicie sesión nuevamente.', 'error');
@@ -343,16 +361,23 @@ async function fetchAPI(endpoint, method = 'GET', data = null) {
                 }, 2000);
                 throw new Error('Sesión expirada');
             }
-            throw new Error(`Error HTTP: ${response.status}`);
+            
+            showToast(errorMessage, 'error');
+            throw new Error(errorMessage);
         }
         
-        return await response.json();
+        const result = await response.json();
+        console.log('✅ Response data:', result);
+        return result;
     } catch (error) {
-        console.error('Error en fetchAPI:', error);
+        console.error('❌ Error en fetchAPI:', error);
         if (error.message !== 'Sesión expirada') {
-            showToast('Error en la comunicación con el servidor', 'error');
+            // Solo mostrar toast si no es un error de red que ya se manejó
+            if (!error.message.includes('Error HTTP')) {
+                showToast(error.message || 'Error en la comunicación con el servidor', 'error');
+            }
         }
-        return null;
+        throw error; // Re-lanzar el error para que talleres.js pueda manejarlo
     }
 }
 
