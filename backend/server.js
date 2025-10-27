@@ -115,7 +115,7 @@ inicializarDB()
         apiRouter.use('/alumnos', require('./routes/alumnos')(pool));
         apiRouter.use('/inventario', require('./routes/inventario')(pool));
         apiRouter.use('/cajas', require('./routes/cajas')(pool));
-        apiRouter.use('/talleres', require('./routes/talleres')(pool));
+        apiRouter.use('/', require('./routes/talleres')(pool));
         apiRouter.use('/reportes', require('./routes/reportes')(pool));
         apiRouter.use('/revision', require('./routes/revision')(pool));
 
@@ -162,7 +162,7 @@ inicializarDB()
 
                 // Consultar docente en la base de datos (TABLA: DOCENTES)
                 const result = await connection.execute(
-                    `SELECT DOC_RUT, DOC_NOMBRE, DOC_APELLIDO, DOC_EMAIL
+                    `SELECT DOC_RUT, DOC_NOMBRES, DOC_APELLIDOS, DOC_EMAIL
              FROM DOCENTES 
              WHERE DOC_RUT = :rut AND DOC_ESTADO = 'ACTIVO'`,
                     { rut: rutLimpio }
@@ -172,12 +172,12 @@ inicializarDB()
 
                 if (result.rows.length > 0) {
                     const usuario = result.rows[0];
-                    console.log('✅ Usuario encontrado:', usuario.DOC_NOMBRE, usuario.DOC_APELLIDO);
+                    console.log('✅ Usuario encontrado:', usuario.DOC_NOMBRES, usuario.DOC_APELLIDOS);
 
                     res.status(200).json({
                         success: true,
                         rut: usuario.DOC_RUT,
-                        nombre: `${usuario.DOC_NOMBRE} ${usuario.DOC_APELLIDO}`,
+                        nombre: `${usuario.DOC_NOMBRES} ${usuario.DOC_APELLIDOS}`,
                         email: usuario.DOC_EMAIL,
                         rol: 'DOCENTE',
                         token: 'jwt-token-' + Date.now()
