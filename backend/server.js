@@ -32,11 +32,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS configurado para desarrollo
+const allowedOrigins = [
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    'http://192.168.1.89:8080',  // Tu IP local desde los logs anteriores
+    'http://192.168.3.19:8080'   // Tu IP actual
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:8080',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: function (origin, callback) {
+        // Permitir solicitudes sin origen (como Postman) o desde orígenes permitidos
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('❌ Origen bloqueado por CORS:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
 }));
 
 // Servir archivos estáticos del frontend
