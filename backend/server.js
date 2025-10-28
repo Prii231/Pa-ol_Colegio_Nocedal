@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const oracledb = require('oracledb');
+oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 const cors = require('cors');
 const path = require('path');
 

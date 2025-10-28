@@ -14,23 +14,33 @@ module.exports = (pool) => {
         let connection;
         try {
             connection = await pool.getConnection();
-            
+
             console.log('🔧 Obteniendo talleres...');
-            
+
             const result = await connection.execute(
                 `SELECT 
-                    TAL_CODIGO as tal_codigo,
-                    TAL_NOMBRE as tal_nombre,
-                    TAL_DESCRIPCION as tal_descripcion,
-                    TAL_UBICACION as tal_ubicacion,
-                    TAL_DOCENTE_ENCARGADO as tal_docente_encargado
+                    TAL_CODIGO,
+                    TAL_NOMBRE,
+                    TAL_DESCRIPCION,
+                    TAL_UBICACION,
+                    TAL_DOCENTE_ENCARGADO
                  FROM TALLERES
                  ORDER BY TAL_NOMBRE`
             );
-            
+
             console.log('✅ Talleres encontrados:', result.rows.length);
-            res.json(result.rows);
-            
+
+            // Convertir claves a minúsculas
+            const talleres = result.rows.map(row => ({
+                tal_codigo: row.TAL_CODIGO,
+                tal_nombre: row.TAL_NOMBRE,
+                tal_descripcion: row.TAL_DESCRIPCION,
+                tal_ubicacion: row.TAL_UBICACION,
+                tal_docente_encargado: row.TAL_DOCENTE_ENCARGADO
+            }));
+
+            res.json(talleres);
+
         } catch (err) {
             console.error('❌ Error obteniendo talleres:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -49,22 +59,22 @@ module.exports = (pool) => {
             const tal_descripcion = req.body.tal_descripcion || req.body.TAL_DESCRIPCION || req.body.talDescripcion || '';
             const tal_ubicacion = req.body.tal_ubicacion || req.body.TAL_UBICACION || req.body.talUbicacion || '';
             const tal_docente_encargado = req.body.tal_docente_encargado || req.body.TAL_DOCENTE_ENCARGADO || req.body.talDocenteEncargado || null;
-            
+
             console.log('➕ Creando nuevo taller:', tal_codigo);
             console.log('📦 Datos recibidos:', req.body);
             console.log('📋 Datos procesados:', { tal_codigo, tal_nombre, tal_descripcion, tal_ubicacion, tal_docente_encargado });
-            
+
             // Validar campos requeridos
             if (!tal_codigo || !tal_nombre) {
-                return res.status(400).json({ 
-                    success: false, 
+                return res.status(400).json({
+                    success: false,
                     error: 'Los campos TAL_CODIGO y TAL_NOMBRE son requeridos',
                     received: req.body
                 });
             }
-            
+
             connection = await pool.getConnection();
-            
+
             await connection.execute(
                 `INSERT INTO TALLERES (TAL_CODIGO, TAL_NOMBRE, TAL_DESCRIPCION, TAL_UBICACION, TAL_DOCENTE_ENCARGADO)
                  VALUES (:codigo, :nombre, :descripcion, :ubicacion, :docente)`,
@@ -77,10 +87,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Taller creado exitosamente');
             res.status(201).json({ success: true, message: 'Taller creado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error creando taller:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -95,25 +105,25 @@ module.exports = (pool) => {
         try {
             const { codigo } = req.params;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT 
-                    TAL_CODIGO,
-                    TAL_NOMBRE,
-                    TAL_DESCRIPCION,
-                    TAL_UBICACION,
-                    TAL_DOCENTE_ENCARGADO
+                    TAL_CODIGO as tal_codigo,
+                    TAL_NOMBRE as tal_nombre,
+                    TAL_DESCRIPCION as tal_descripcion,
+                    TAL_UBICACION as tal_ubicacion,
+                    TAL_DOCENTE_ENCARGADO as tal_docente_encargado
                  FROM TALLERES
                  WHERE TAL_CODIGO = :codigo`,
                 { codigo }
             );
-            
+
             if (result.rows.length > 0) {
                 res.json(result.rows[0]);
             } else {
                 res.status(404).json({ success: false, message: 'Taller no encontrado' });
             }
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo taller:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -129,9 +139,9 @@ module.exports = (pool) => {
             const { codigo } = req.params;
             const { tal_nombre, tal_descripcion, tal_ubicacion, tal_docente_encargado } = req.body;
             connection = await pool.getConnection();
-            
+
             console.log('✏️ Actualizando taller:', codigo);
-            
+
             await connection.execute(
                 `UPDATE TALLERES
                  SET TAL_NOMBRE = :nombre,
@@ -148,10 +158,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Taller actualizado exitosamente');
             res.json({ success: true, message: 'Taller actualizado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error actualizando taller:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -166,18 +176,18 @@ module.exports = (pool) => {
         try {
             const { codigo } = req.params;
             connection = await pool.getConnection();
-            
+
             console.log('🗑️ Eliminando taller:', codigo);
-            
+
             await connection.execute(
                 `DELETE FROM TALLERES WHERE TAL_CODIGO = :codigo`,
                 { codigo },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Taller eliminado exitosamente');
             res.json({ success: true, message: 'Taller eliminado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error eliminando taller:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -195,9 +205,9 @@ module.exports = (pool) => {
         let connection;
         try {
             connection = await pool.getConnection();
-            
+
             console.log('📚 Obteniendo cursos...');
-            
+
             const result = await connection.execute(
                 `SELECT 
                     c.CUR_CODIGO,
@@ -212,10 +222,10 @@ module.exports = (pool) => {
                  LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
                  ORDER BY c.CUR_NIVEL, c.CUR_LETRA`
             );
-            
+
             console.log('✅ Cursos encontrados:', result.rows.length);
             res.json(result.rows);
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo cursos:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -230,9 +240,9 @@ module.exports = (pool) => {
         try {
             const { cur_codigo, cur_nivel, cur_letra, cur_anio, tal_codigo, cur_cantidad_alumnos } = req.body;
             connection = await pool.getConnection();
-            
+
             console.log('➕ Creando nuevo curso:', cur_codigo);
-            
+
             await connection.execute(
                 `INSERT INTO CURSOS (CUR_CODIGO, CUR_NIVEL, CUR_LETRA, CUR_ANIO, TAL_CODIGO, CUR_CANTIDAD_ALUMNOS)
                  VALUES (:codigo, :nivel, :letra, :anio, :taller, :cantidad)`,
@@ -246,10 +256,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Curso creado exitosamente');
             res.status(201).json({ success: true, message: 'Curso creado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error creando curso:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -264,7 +274,7 @@ module.exports = (pool) => {
         try {
             const { codigo } = req.params;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT 
                     c.CUR_CODIGO,
@@ -280,13 +290,13 @@ module.exports = (pool) => {
                  WHERE c.CUR_CODIGO = :codigo`,
                 { codigo }
             );
-            
+
             if (result.rows.length > 0) {
                 res.json(result.rows[0]);
             } else {
                 res.status(404).json({ success: false, message: 'Curso no encontrado' });
             }
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo curso:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -302,9 +312,9 @@ module.exports = (pool) => {
             const { codigo } = req.params;
             const { cur_nivel, cur_letra, cur_anio, tal_codigo, cur_cantidad_alumnos } = req.body;
             connection = await pool.getConnection();
-            
+
             console.log('✏️ Actualizando curso:', codigo);
-            
+
             await connection.execute(
                 `UPDATE CURSOS
                  SET CUR_NIVEL = :nivel,
@@ -323,10 +333,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Curso actualizado exitosamente');
             res.json({ success: true, message: 'Curso actualizado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error actualizando curso:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -341,18 +351,18 @@ module.exports = (pool) => {
         try {
             const { codigo } = req.params;
             connection = await pool.getConnection();
-            
+
             console.log('🗑️ Eliminando curso:', codigo);
-            
+
             await connection.execute(
                 `DELETE FROM CURSOS WHERE CUR_CODIGO = :codigo`,
                 { codigo },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Curso eliminado exitosamente');
             res.json({ success: true, message: 'Curso eliminado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error eliminando curso:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -367,7 +377,7 @@ module.exports = (pool) => {
         try {
             const { codigo } = req.params;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT 
                     GRU_ID,
@@ -382,9 +392,9 @@ module.exports = (pool) => {
                  ORDER BY GRU_NUMERO`,
                 { codigo }
             );
-            
+
             res.json(result.rows);
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo grupos del curso:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -402,9 +412,9 @@ module.exports = (pool) => {
         let connection;
         try {
             connection = await pool.getConnection();
-            
+
             console.log('👥 Obteniendo grupos...');
-            
+
             const result = await connection.execute(
                 `SELECT 
                     g.GRU_ID,
@@ -421,10 +431,10 @@ module.exports = (pool) => {
                  WHERE g.GRU_ESTADO = 'ACTIVO'
                  ORDER BY c.CUR_NIVEL, c.CUR_LETRA, g.GRU_NUMERO`
             );
-            
+
             console.log('✅ Grupos encontrados:', result.rows.length);
             res.json(result.rows);
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo grupos:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -439,9 +449,9 @@ module.exports = (pool) => {
         try {
             const { gru_numero, gru_nombre, cur_codigo, gru_anio, gru_estado } = req.body;
             connection = await pool.getConnection();
-            
+
             console.log('➕ Creando nuevo grupo:', gru_nombre);
-            
+
             // Oracle genera el GRU_ID automáticamente si es auto-incremental
             // Si no, necesitarías obtener el siguiente ID de una secuencia
             await connection.execute(
@@ -456,10 +466,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Grupo creado exitosamente');
             res.status(201).json({ success: true, message: 'Grupo creado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error creando grupo:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -474,9 +484,9 @@ module.exports = (pool) => {
         try {
             const { anio } = req.query;
             connection = await pool.getConnection();
-            
+
             console.log('🔍 Buscando grupos sin préstamo para año:', anio || new Date().getFullYear());
-            
+
             const result = await connection.execute(
                 `SELECT 
                     g.GRU_ID,
@@ -498,10 +508,10 @@ module.exports = (pool) => {
                  ORDER BY t.TAL_NOMBRE, c.CUR_NIVEL, c.CUR_LETRA, g.GRU_NUMERO`,
                 { anio: anio || new Date().getFullYear() }
             );
-            
+
             console.log('✅ Grupos sin préstamo:', result.rows.length);
             res.json(result.rows);
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo grupos sin préstamo:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -516,7 +526,7 @@ module.exports = (pool) => {
         try {
             const { id } = req.params;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT 
                     g.GRU_ID,
@@ -534,13 +544,13 @@ module.exports = (pool) => {
                  WHERE g.GRU_ID = :id`,
                 { id }
             );
-            
+
             if (result.rows.length > 0) {
                 res.json(result.rows[0]);
             } else {
                 res.status(404).json({ success: false, message: 'Grupo no encontrado' });
             }
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo grupo:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -556,9 +566,9 @@ module.exports = (pool) => {
             const { id } = req.params;
             const { gru_numero, gru_nombre, cur_codigo, gru_anio, gru_estado } = req.body;
             connection = await pool.getConnection();
-            
+
             console.log('✏️ Actualizando grupo:', id);
-            
+
             await connection.execute(
                 `UPDATE GRUPOS_TRABAJO
                  SET GRU_NUMERO = :numero,
@@ -577,10 +587,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Grupo actualizado exitosamente');
             res.json({ success: true, message: 'Grupo actualizado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error actualizando grupo:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -595,19 +605,19 @@ module.exports = (pool) => {
         try {
             const { id } = req.params;
             connection = await pool.getConnection();
-            
+
             console.log('🗑️ Desactivando grupo:', id);
-            
+
             // En lugar de eliminar, cambiar estado a INACTIVO
             await connection.execute(
                 `UPDATE GRUPOS_TRABAJO SET GRU_ESTADO = 'INACTIVO' WHERE GRU_ID = :id`,
                 { id },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Grupo desactivado exitosamente');
             res.json({ success: true, message: 'Grupo desactivado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error desactivando grupo:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -622,7 +632,7 @@ module.exports = (pool) => {
         try {
             const { id } = req.params;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT 
                     ig.ING_ID,
@@ -637,16 +647,16 @@ module.exports = (pool) => {
                  ORDER BY ig.ING_ROL DESC, a.ALU_APELLIDOS`,
                 { id }
             );
-            
+
             res.json(result.rows);
-            
+
         } catch (err) {
             // Si la tabla no existe, retornar array vacío
             if (err.message.includes('ORA-00942')) {
                 console.log('⚠️  Tabla INTEGRANTES_GRUPO no existe');
                 return res.json([]);
             }
-            
+
             console.error('❌ Error obteniendo integrantes:', err.message);
             res.status(500).json({ success: false, error: err.message });
         } finally {
@@ -661,14 +671,14 @@ module.exports = (pool) => {
             const { id } = req.params;
             const { anio } = req.query;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT COUNT(*) AS TIENE_PRESTAMO
                  FROM PRESTAMOS_ANUALES
                  WHERE GRU_ID = :id
                  AND PRE_ANIO = :anio
                  AND PRE_ESTADO = 'ACTIVO'`,
-                { 
+                {
                     id: id,
                     anio: anio || new Date().getFullYear()
                 }
