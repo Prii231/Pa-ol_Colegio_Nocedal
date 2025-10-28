@@ -224,7 +224,18 @@ module.exports = (pool) => {
             );
 
             console.log('✅ Cursos encontrados:', result.rows.length);
-            res.json(result.rows);
+            const cursos = result.rows.map(row => ({
+                cur_codigo: row.CUR_CODIGO,
+                cur_nivel: row.CUR_NIVEL,
+                cur_letra: row.CUR_LETRA,
+                cur_anio: row.CUR_ANIO,
+                tal_codigo: row.TAL_CODIGO,
+                cur_cantidad_alumnos: row.CUR_CANTIDAD_ALUMNOS,
+                taller_nombre: row.TALLER_NOMBRE,
+                cantidad_grupos: row.CANTIDAD_GRUPOS
+            }));
+
+            res.json(cursos);
 
         } catch (err) {
             console.error('❌ Error obteniendo cursos:', err.message);
@@ -433,7 +444,21 @@ module.exports = (pool) => {
             );
 
             console.log('✅ Grupos encontrados:', result.rows.length);
-            res.json(result.rows);
+            const grupos = result.rows.map(row => ({
+                gru_id: row.GRU_ID,
+                gru_numero: row.GRU_NUMERO,
+                gru_nombre: row.GRU_NOMBRE,
+                cur_codigo: row.CUR_CODIGO,
+                gru_anio: row.GRU_ANIO,
+                gru_estado: row.GRU_ESTADO,
+                curso_nombre: row.CURSO_NOMBRE,
+                taller_nombre: row.TALLER_NOMBRE,
+                tal_codigo: row.TAL_CODIGO,
+                cantidad_integrantes: row.CANTIDAD_INTEGRANTES,
+                tiene_prestamo: row.TIENE_PRESTAMO
+            }));
+
+            res.json(grupos);
 
         } catch (err) {
             console.error('❌ Error obteniendo grupos:', err.message);

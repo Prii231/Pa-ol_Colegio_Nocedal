@@ -65,96 +65,100 @@
         <main class="main-content">
             <h1 class="page-title">Talleres y Cursos</h1>
             
-            <!-- Tabs -->
-            <div class="tabs" id="talleresTabsContainer">
-                <div class="tab active" onclick="PanolApp.switchTab('talleresTabsContainer', 0)">Talleres</div>
-                <div class="tab" onclick="PanolApp.switchTab('talleresTabsContainer', 1)">Cursos</div>
-                <div class="tab" onclick="PanolApp.switchTab('talleresTabsContainer', 2)">Grupos de Trabajo</div>
-            </div>
-
-            <!-- Tab 1: Talleres -->
-            <div class="tab-content active">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Talleres Registrados</h3>
-                        <button class="btn btn-primary" onclick="PanolApp.openModal('tallerModal')">+ Nuevo Taller</button>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Ubicación</th>
-                                <th>Docente Encargado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="talleresTableBody">
-                            <!-- Los datos se cargarán dinámicamente desde talleres.js -->
-                        </tbody>
-                    </table>
+            <!-- Tabs Container - CORREGIDO -->
+            <div id="talleresTabsContainer">
+                <!-- Pestañas -->
+                <div class="tabs">
+                    <div class="tab active" onclick="PanolApp.switchTab('talleresTabsContainer', 0)">Talleres</div>
+                    <div class="tab" onclick="PanolApp.switchTab('talleresTabsContainer', 1)">Cursos</div>
+                    <div class="tab" onclick="PanolApp.switchTab('talleresTabsContainer', 2)">Grupos de Trabajo</div>
                 </div>
-            </div>
 
-            <!-- Tab 2: Cursos -->
-            <div class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Cursos 2025</h3>
-                        <button class="btn btn-primary" onclick="PanolApp.openModal('cursoModal')">+ Nuevo Curso</button>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Nivel</th>
-                                <th>Letra</th>
-                                <th>Taller</th>
-                                <th>Cantidad Alumnos</th>
-                                <th>Grupos</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cursosTableBody">
-                            <!-- Los datos se cargarán dinámicamente desde talleres.js -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Tab 3: Grupos de Trabajo -->
-            <div class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Grupos de Trabajo 2025</h3>
-                        <div class="header-actions">
-                            <input type="text" id="searchGrupos" placeholder="🔍 Buscar grupo..." class="search-input">
-                            <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo Grupo</button>
+                <!-- Tab 1: Talleres -->
+                <div class="tab-content active">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>Talleres Registrados</h3>
+                            <button class="btn btn-primary" onclick="PanolApp.openModal('tallerModal')">+ Nuevo Taller</button>
                         </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Ubicación</th>
+                                    <th>Docente Encargado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="talleresTableBody">
+                                <!-- Los datos se cargarán dinámicamente desde talleres.js -->
+                            </tbody>
+                        </table>
                     </div>
-                    <table id="gruposTable">
-                        <thead>
-                            <tr>
-                                <th>Número</th>
-                                <th>Nombre</th>
-                                <th>Curso</th>
-                                <th>Taller</th>
-                                <th>Integrantes</th>
-                                <th>Estado Préstamo</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="gruposTableBody">
-                            <!-- Los datos se cargarán dinámicamente desde talleres.js -->
-                        </tbody>
-                    </table>
+                </div>
+
+                <!-- Tab 2: Cursos -->
+                <div class="tab-content">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>Cursos 2025</h3>
+                            <button class="btn btn-primary" onclick="PanolApp.openModal('cursoModal')">+ Nuevo Curso</button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nivel</th>
+                                    <th>Letra</th>
+                                    <th>Taller</th>
+                                    <th>Cantidad Alumnos</th>
+                                    <th>Grupos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cursosTableBody">
+                                <!-- Los datos se cargarán dinámicamente desde talleres.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Grupos de Trabajo -->
+                <div class="tab-content">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>Grupos de Trabajo 2025</h3>
+                            <div class="header-actions">
+                                <input type="text" id="searchGrupos" placeholder="🔍 Buscar grupo..." class="search-input">
+                                <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo Grupo</button>
+                            </div>
+                        </div>
+                        <table id="gruposTable">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Nombre</th>
+                                    <th>Curso</th>
+                                    <th>Taller</th>
+                                    <th>Integrantes</th>
+                                    <th>Estado Préstamo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gruposTableBody">
+                                <!-- Los datos se cargarán dinámicamente desde talleres.js -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+            <!-- FIN Tabs Container -->
         </main>
     </div>
 
-    <!-- Modal Nuevo Taller -->
+    <!-- Modal Nuevo Taller - CON CAMPO DOCENTE -->
     <div id="tallerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -177,6 +181,11 @@
                 <div class="form-group">
                     <label for="tallerUbicacion">Ubicación</label>
                     <input type="text" id="tallerUbicacion" maxlength="100" placeholder="Ej: Edificio CAP - Segundo Piso">
+                </div>
+                <!-- NUEVO CAMPO: Docente Encargado -->
+                <div class="form-group">
+                    <label for="tallerDocente">Docente Encargado</label>
+                    <input type="text" id="tallerDocente" maxlength="100" placeholder="Nombre del docente encargado">
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('tallerModal')">Cancelar</button>
