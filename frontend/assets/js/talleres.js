@@ -17,12 +17,33 @@ async function cargarTalleres() {
             talleresData = response;
             console.log('✅ Talleres cargados:', talleresData.length);
             renderTalleresTable();
+            cargarTalleresEnSelect(); // ← AGREGAR ESTA LÍNEA
         }
     } catch (error) {
         console.error('❌ Error cargando talleres:', error);
         PanolApp.showToast('Error al cargar talleres', 'error');
     }
 }
+
+// Llenar select de talleres en el modal de curso
+function cargarTalleresEnSelect() {
+    const selectTaller = document.getElementById('cursoTaller');
+    if (!selectTaller) return;
+    
+    // Limpiar opciones existentes excepto la primera
+    selectTaller.innerHTML = '<option value="">Seleccione...</option>';
+    
+    // Agregar cada taller como opción
+    talleresData.forEach(taller => {
+        const option = document.createElement('option');
+        option.value = taller.tal_codigo;
+        option.textContent = `${taller.tal_codigo} - ${taller.tal_nombre}`;
+        selectTaller.appendChild(option);
+    });
+    
+    console.log('✅ Select de talleres llenado con', talleresData.length, 'opciones');
+}
+
 
 function renderTalleresTable() {
     console.log('🎨 renderTalleresTable() iniciando...');
@@ -206,12 +227,33 @@ async function cargarCursos() {
             cursosData = response;
             console.log('✅ Cursos cargados:', cursosData.length);
             renderCursosTable();
+            cargarCursosEnSelect(); // ← AGREGAR ESTA LÍNEA
         }
     } catch (error) {
         console.error('❌ Error cargando cursos:', error);
         PanolApp.showToast('Error al cargar cursos', 'error');
     }
 }
+
+// Llenar select de cursos en el modal de grupo
+function cargarCursosEnSelect() {
+    const selectCurso = document.getElementById('grupoCurso');
+    if (!selectCurso) return;
+    
+    // Limpiar opciones existentes excepto la primera
+    selectCurso.innerHTML = '<option value="">Seleccione...</option>';
+    
+    // Agregar cada curso como opción
+    cursosData.forEach(curso => {
+        const option = document.createElement('option');
+        option.value = curso.cur_codigo;
+        option.textContent = `${curso.cur_codigo} - ${curso.cur_nivel} ${curso.cur_letra}`;
+        selectCurso.appendChild(option);
+    });
+    
+    console.log('✅ Select de cursos llenado con', cursosData.length, 'opciones');
+}
+
 
 function renderCursosTable() {
     const tbody = document.getElementById('cursosTableBody');
