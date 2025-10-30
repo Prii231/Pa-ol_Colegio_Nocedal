@@ -65,7 +65,7 @@
         <main class="main-content">
             <h1 class="page-title">Talleres y Cursos</h1>
             
-            <!-- Tabs Container - CORREGIDO -->
+            <!-- Tabs Container -->
             <div id="talleresTabsContainer">
                 <!-- Pestañas -->
                 <div class="tabs">
@@ -125,32 +125,23 @@
                     </div>
                 </div>
 
-                <!-- Tab 3: Grupos de Trabajo -->
+                <!-- Tab 3: Grupos de Trabajo - MODIFICADO PARA SECCIONES -->
                 <div class="tab-content">
-                    <div class="table-container">
-                        <div class="table-header">
-                            <h3>Grupos de Trabajo 2025</h3>
-                            <div class="header-actions">
-                                <input type="text" id="searchGrupos" placeholder="🔍 Buscar grupo..." class="search-input">
-                                <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo Grupo</button>
-                            </div>
+                    <!-- Header principal con búsqueda y botón -->
+                    <div class="table-header" style="margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem;">Grupos de Trabajo 2025</h3>
+                            <input type="text" id="searchGrupos" placeholder="🔍 Buscar grupo..." class="search-input" style="max-width: 300px;">
                         </div>
-                        <table id="gruposTable">
-                            <thead>
-                                <tr>
-                                    <th>Número</th>
-                                    <th>Nombre</th>
-                                    <th>Curso</th>
-                                    <th>Taller</th>
-                                    <th>Integrantes</th>
-                                    <th>Estado Préstamo</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="gruposTableBody">
-                                <!-- Los datos se cargarán dinámicamente desde talleres.js -->
-                            </tbody>
-                        </table>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo Grupo</button>
+                    </div>
+                    
+                    <!-- Contenedor de secciones por curso -->
+                    <div id="gruposContainer">
+                        <!-- Las secciones se generarán dinámicamente aquí -->
+                        <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                            <p>Cargando grupos...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -158,7 +149,7 @@
         </main>
     </div>
 
-    <!-- Modal Nuevo Taller - CON CAMPO DOCENTE -->
+    <!-- Modal Nuevo Taller -->
     <div id="tallerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -182,7 +173,6 @@
                     <label for="tallerUbicacion">Ubicación</label>
                     <input type="text" id="tallerUbicacion" maxlength="100" placeholder="Ej: Edificio CAP - Segundo Piso">
                 </div>
-                <!-- NUEVO CAMPO: Docente Encargado -->
                 <div class="form-group">
                     <label for="tallerDocente">Docente Encargado</label>
                     <input type="text" id="tallerDocente" maxlength="100" placeholder="Nombre del docente encargado">
@@ -280,9 +270,9 @@
     <!-- Scripts -->
     <script src="../assets/js/App.js"></script>
     <script>
-        // Configurar búsqueda en tabla de grupos después de que cargue el DOM
+        // Configurar búsqueda en grupos después de que cargue el DOM
         document.addEventListener('DOMContentLoaded', function() {
-            PanolApp.setupTableSearch('searchGrupos', 'gruposTable');
+            // La búsqueda ahora se implementa en talleres.js para buscar en todas las secciones
         });
     </script>
     <!-- IMPORTANTE: talleres.js debe cargarse al final para manejar los formularios -->

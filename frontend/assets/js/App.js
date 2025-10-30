@@ -233,12 +233,31 @@ function setupTableSearch(searchInputId, tableId) {
 // =============================================
 
 function validarRut(rut) {
+    console.log('🔍 validarRut llamado con:', rut);
+    console.log('  - Tipo:', typeof rut);
+    console.log('  - Valor raw:', JSON.stringify(rut));
+    
+    // Validar que rut exista y no sea vacío
+    if (!rut || typeof rut !== 'string' || rut.trim() === '') {
+        return false;
+    }
+    
     // Eliminar puntos y guión
     rut = rut.replace(/\./g, '').replace(/-/g, '');
+    
+    // Validar longitud mínima
+    if (rut.length < 2) {
+        return false;
+    }
     
     // Separar número y dígito verificador
     const rutNumero = rut.slice(0, -1);
     const dv = rut.slice(-1).toUpperCase();
+    
+    // Validar que rutNumero contenga solo dígitos
+    if (!/^\d+$/.test(rutNumero)) {
+        return false;
+    }
     
     // Calcular dígito verificador
     let suma = 0;

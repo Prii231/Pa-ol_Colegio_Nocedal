@@ -150,27 +150,45 @@ function actualizarEstadisticas() {
 // =============================================
 
 // Guardar alumno (crear o actualizar)
-async function guardarAlumno(formData) {
-    const rut = formData.get('alumnoRut');
+async function guardarAlumno() {
+    // Leer valores directamente del DOM
+    
+    const rutInput = document.getElementById('alumnoRut');
+    const nombresInput = document.getElementById('alumnoNombres');
+    const apellidosInput = document.getElementById('alumnoApellidos');
+    const emailInput = document.getElementById('alumnoEmail');
+    const telefonoInput = document.getElementById('alumnoTelefono');
+    const cursoInput = document.getElementById('alumnoCurso');
+    const grupoInput = document.getElementById('alumnoGrupo');
+    const anioInput = document.getElementById('alumnoAnioIngreso');
+    
+    const rut = rutInput ? rutInput.value : null;
     
     // Validar RUT
-    if (!PanolApp.validarRut(rut)) {
+    if (!rut || !PanolApp.validarRut(rut)) {
         PanolApp.showToast('RUT inválido', 'error');
-        document.getElementById('alumnoRutError').style.display = 'block';
+        const rutError = document.getElementById('alumnoRutError');
+        if (rutError) rutError.style.display = 'block';
         return;
     }
     
     const alumno = {
         alu_rut: rut.replace(/\./g, '').replace(/-/g, ''),
-        alu_nombres: formData.get('alumnoNombres'),
-        alu_apellidos: formData.get('alumnoApellidos'),
-        alu_email: formData.get('alumnoEmail'),
-        alu_telefono: formData.get('alumnoTelefono'),
-        cur_codigo: formData.get('alumnoCurso'),
-        gru_id: formData.get('alumnoGrupo') || null,
-        alu_anio_ingreso: formData.get('alumnoAnioIngreso'),
+        alu_nombres: nombresInput ? nombresInput.value : '',
+        alu_apellidos: apellidosInput ? apellidosInput.value : '',
+        alu_email: emailInput ? emailInput.value : null,
+        alu_telefono: telefonoInput ? telefonoInput.value : null,
+        cur_codigo: cursoInput ? cursoInput.value : null,
+        gru_id: grupoInput ? grupoInput.value : null,
+        alu_anio_ingreso: anioInput ? anioInput.value : new Date().getFullYear(),
         alu_estado: 'ACTIVO'
     };
+    
+    // Validar campos obligatorios
+    if (!alumno.alu_nombres || !alumno.alu_apellidos || !alumno.cur_codigo) {
+        PanolApp.showToast('Nombres, Apellidos y Curso son obligatorios', 'error');
+        return;
+    }
     
     try {
         const existe = alumnosData.some(a => a.alu_rut === alumno.alu_rut);
@@ -181,7 +199,7 @@ async function guardarAlumno(formData) {
         
         if (response) {
             // Si se asignó a un grupo, registrar en integrantes_grupo
-            if (alumno.gru_id) {
+            if (alumno.gru_id && !existe) {
                 await asignarAlumnoAGrupo(alumno.alu_rut, alumno.gru_id);
             }
             
@@ -337,22 +355,6 @@ function limpiarFiltros() {
 }
 
 // =============================================
-// IMPORTACIÓN MASIVA
-// =============================================
-
-// Importar alumnos desde CSV
-async function importarAlumnosCSV(archivo) {
-    // Implementar importación desde CSV
-    PanolApp.showToast('Procesando archivo...', 'info');
-    
-    // Aquí iría la lógica de parseo CSV y carga masiva
-    setTimeout(() => {
-        PanolApp.showToast('Alumnos importados exitosamente', 'success');
-        cargarAlumnos();
-    }, 2000);
-}
-
-// =============================================
 // INICIALIZACIÓN
 // =============================================
 
@@ -369,8 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (alumnoForm) {
         alumnoForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            guardarAlumno(formData);
+            guardarAlumno(); // Ya no pasa FormData
         });
     }
     

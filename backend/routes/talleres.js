@@ -420,53 +420,64 @@ module.exports = (pool) => {
 
     // GET - Listar todos los grupos
     router.get('/grupos', async (req, res) => {
-        let connection;
-        try {
-            connection = await pool.getConnection();
-
-            console.log('👥 Obteniendo grupos...');
-
-            const result = await connection.execute(
-                `SELECT 
-                    g.GRU_ID,
-                    g.GRU_NUMERO,
-                    g.GRU_NOMBRE,
-                    g.CUR_CODIGO,
-                    g.GRU_ANIO,
-                    g.GRU_ESTADO,
-                    c.CUR_NIVEL || c.CUR_LETRA AS CURSO_NOMBRE,
-                    t.TAL_NOMBRE AS TALLER_NOMBRE
-                 FROM GRUPOS_TRABAJO g
-                 INNER JOIN CURSOS c ON g.CUR_CODIGO = c.CUR_CODIGO
-                 LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
-                 WHERE g.GRU_ESTADO = 'ACTIVO'
-                 ORDER BY c.CUR_NIVEL, c.CUR_LETRA, g.GRU_NUMERO`
-            );
-
-            console.log('✅ Grupos encontrados:', result.rows.length);
-            const grupos = result.rows.map(row => ({
-                gru_id: row.GRU_ID,
-                gru_numero: row.GRU_NUMERO,
-                gru_nombre: row.GRU_NOMBRE,
-                cur_codigo: row.CUR_CODIGO,
-                gru_anio: row.GRU_ANIO,
-                gru_estado: row.GRU_ESTADO,
-                curso_nombre: row.CURSO_NOMBRE,
-                taller_nombre: row.TALLER_NOMBRE,
-                tal_codigo: row.TAL_CODIGO,
-                cantidad_integrantes: row.CANTIDAD_INTEGRANTES,
-                tiene_prestamo: row.TIENE_PRESTAMO
-            }));
-
-            res.json(grupos);
-
-        } catch (err) {
-            console.error('❌ Error obteniendo grupos:', err.message);
-            res.status(500).json({ success: false, error: err.message });
-        } finally {
-            if (connection) await connection.close();
-        }
-    });
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        
+        console.log('👥 Obteniendo grupos...');
+        
+        const result = await connection.execute(
+            `SELECT 
+                g.GRU_ID,
+                g.GRU_NUMERO,
+                g.GRU_NOMBRE,
+                g.CUR_CODIGO,
+                g.GRU_ANIO,
+                g.GRU_ESTADO,
+                c.CUR_NIVEL || ' ' || c.CUR_LETRA AS CURSO_NOMBRE,
+                c.TAL_CODIGO,
+                t.TAL_NOMBRE AS TALLER_NOMBRE,
+                (SELECT COUNT(*) 
+                 FROM INTEGRANTES_GRUPO ig 
+                 WHERE ig.GRU_ID = g.GRU_ID) AS CANTIDAD_INTEGRANTES,
+                (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+                 FROM PRESTAMOS_ANUALES p 
+                 WHERE p.GRU_ID = g.GRU_ID 
+                 AND p.PRE_ANIO = g.GRU_ANIO 
+                 AND p.PRE_ESTADO = 'ACTIVO') AS TIENE_PRESTAMO
+             FROM GRUPOS_TRABAJO g
+             INNER JOIN CURSOS c ON g.CUR_CODIGO = c.CUR_CODIGO
+             LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
+             WHERE g.GRU_ESTADO = 'ACTIVO'
+             ORDER BY c.CUR_NIVEL, c.CUR_LETRA, g.GRU_NUMERO`
+        );
+        
+        console.log('✅ Grupos encontrados:', result.rows.length);
+        
+        // Convertir claves a minúsculas
+        const grupos = result.rows.map(row => ({
+            gru_id: row.GRU_ID,
+            gru_numero: row.GRU_NUMERO,
+            gru_nombre: row.GRU_NOMBRE,
+            cur_codigo: row.CUR_CODIGO,
+            gru_anio: row.GRU_ANIO,
+            gru_estado: row.GRU_ESTADO,
+            curso_nombre: row.CURSO_NOMBRE,
+            taller_nombre: row.TALLER_NOMBRE,
+            tal_codigo: row.TAL_CODIGO,
+            cantidad_integrantes: row.CANTIDAD_INTEGRANTES || 0,
+            tiene_prestamo: row.TIENE_PRESTAMO === 1
+        }));
+        
+        res.json(grupos);
+        
+    } catch (err) {
+        console.error('❌ Error obteniendo grupos:', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    } finally {
+        if (connection) await connection.close();
+    }
+});
 
     // POST - Crear nuevo grupo
     router.post('/grupos', async (req, res) => {
