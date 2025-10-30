@@ -470,38 +470,36 @@ module.exports = (pool) => {
 
     // POST - Crear nuevo grupo
     router.post('/grupos', async (req, res) => {
-        let connection;
-        try {
-            const { gru_numero, gru_nombre, cur_codigo, gru_anio, gru_estado } = req.body;
-            connection = await pool.getConnection();
-
-            console.log('➕ Creando nuevo grupo:', gru_nombre);
-
-            // Oracle genera el GRU_ID automáticamente si es auto-incremental
-            // Si no, necesitarías obtener el siguiente ID de una secuencia
-            await connection.execute(
-                `INSERT INTO GRUPOS_TRABAJO (GRU_NUMERO, GRU_NOMBRE, CUR_CODIGO, GRU_ANIO, GRU_ESTADO)
-                 VALUES (:numero, :nombre, :curso, :anio, :estado)`,
-                {
-                    numero: gru_numero,
-                    nombre: gru_nombre,
-                    curso: cur_codigo,
-                    anio: gru_anio || new Date().getFullYear(),
-                    estado: gru_estado || 'ACTIVO'
-                },
-                { autoCommit: true }
-            );
-
-            console.log('✅ Grupo creado exitosamente');
-            res.status(201).json({ success: true, message: 'Grupo creado exitosamente' });
-
-        } catch (err) {
-            console.error('❌ Error creando grupo:', err.message);
-            res.status(500).json({ success: false, error: err.message });
-        } finally {
-            if (connection) await connection.close();
-        }
-    });
+    let connection;
+    try {
+        const { gru_numero, gru_nombre, cur_codigo, gru_anio, gru_estado } = req.body;
+        connection = await pool.getConnection();
+        
+        console.log('➕ Creando nuevo grupo:', gru_nombre);
+        
+        await connection.execute(
+            `INSERT INTO GRUPOS_TRABAJO (GRU_ID, GRU_NUMERO, GRU_NOMBRE, CUR_CODIGO, GRU_ANIO, GRU_ESTADO)
+             VALUES (SEQ_GRUPO.NEXTVAL, :numero, :nombre, :curso, :anio, :estado)`,
+            {
+                numero: gru_numero,
+                nombre: gru_nombre,
+                curso: cur_codigo,
+                anio: gru_anio || new Date().getFullYear(),
+                estado: gru_estado || 'ACTIVO'
+            },
+            { autoCommit: true }
+        );
+        
+        console.log('✅ Grupo creado exitosamente');
+        res.status(201).json({ success: true, message: 'Grupo creado exitosamente' });
+        
+    } catch (err) {
+        console.error('❌ Error creando grupo:', err.message);
+        res.status(500).json({ success: false, error: err.message });
+    } finally {
+        if (connection) await connection.close();
+    }
+});
 
     // GET - Grupos sin préstamo activo
     router.get('/grupos/sin-prestamo', async (req, res) => {
