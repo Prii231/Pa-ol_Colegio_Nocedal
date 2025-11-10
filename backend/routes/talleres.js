@@ -1,4 +1,4 @@
-// routes/talleres.js - COMPLETO (Talleres, Cursos y Grupos)
+// routes/talleres.js - COMPLETO Y CORREGIDO (Talleres, Cursos y Grupos)
 
 const express = require('express');
 
@@ -10,7 +10,7 @@ module.exports = (pool) => {
     // =============================================
 
     // GET - Listar todos los talleres
-    router.get('/talleres', async (req, res) => {
+    router.get('/', async (req, res) => {
         let connection;
         try {
             connection = await pool.getConnection();
@@ -50,7 +50,7 @@ module.exports = (pool) => {
     });
 
     // POST - Crear nuevo taller
-    router.post('/talleres', async (req, res) => {
+    router.post('/', async (req, res) => {
         let connection;
         try {
             // Aceptar múltiples formatos de nombres de campos
@@ -100,7 +100,7 @@ module.exports = (pool) => {
     });
 
     // GET - Obtener un taller específico
-    router.get('/talleres/:codigo', async (req, res) => {
+    router.get('/:codigo', async (req, res) => {
         let connection;
         try {
             const { codigo } = req.params;
@@ -133,7 +133,7 @@ module.exports = (pool) => {
     });
 
     // PUT - Actualizar taller
-    router.put('/talleres/:codigo', async (req, res) => {
+    router.put('/:codigo', async (req, res) => {
         let connection;
         try {
             const { codigo } = req.params;
@@ -171,7 +171,7 @@ module.exports = (pool) => {
     });
 
     // DELETE - Eliminar taller
-    router.delete('/talleres/:codigo', async (req, res) => {
+    router.delete('/:codigo', async (req, res) => {
         let connection;
         try {
             const { codigo } = req.params;
