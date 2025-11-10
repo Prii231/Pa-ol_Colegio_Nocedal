@@ -1,4 +1,5 @@
 // routes/talleres.js - COMPLETO Y CORREGIDO (Talleres, Cursos y Grupos)
+// ORDEN CORRECTO: Rutas específicas ANTES que rutas con parámetros
 
 const express = require('express');
 
@@ -99,105 +100,8 @@ module.exports = (pool) => {
         }
     });
 
-    // GET - Obtener un taller específico
-    router.get('/:codigo', async (req, res) => {
-        let connection;
-        try {
-            const { codigo } = req.params;
-            connection = await pool.getConnection();
-
-            const result = await connection.execute(
-                `SELECT 
-                    TAL_CODIGO as tal_codigo,
-                    TAL_NOMBRE as tal_nombre,
-                    TAL_DESCRIPCION as tal_descripcion,
-                    TAL_UBICACION as tal_ubicacion,
-                    TAL_DOCENTE_ENCARGADO as tal_docente_encargado
-                 FROM TALLERES
-                 WHERE TAL_CODIGO = :codigo`,
-                { codigo }
-            );
-
-            if (result.rows.length > 0) {
-                res.json(result.rows[0]);
-            } else {
-                res.status(404).json({ success: false, message: 'Taller no encontrado' });
-            }
-
-        } catch (err) {
-            console.error('❌ Error obteniendo taller:', err.message);
-            res.status(500).json({ success: false, error: err.message });
-        } finally {
-            if (connection) await connection.close();
-        }
-    });
-
-    // PUT - Actualizar taller
-    router.put('/:codigo', async (req, res) => {
-        let connection;
-        try {
-            const { codigo } = req.params;
-            const { tal_nombre, tal_descripcion, tal_ubicacion, tal_docente_encargado } = req.body;
-            connection = await pool.getConnection();
-
-            console.log('✏️ Actualizando taller:', codigo);
-
-            await connection.execute(
-                `UPDATE TALLERES
-                 SET TAL_NOMBRE = :nombre,
-                     TAL_DESCRIPCION = :descripcion,
-                     TAL_UBICACION = :ubicacion,
-                     TAL_DOCENTE_ENCARGADO = :docente
-                 WHERE TAL_CODIGO = :codigo`,
-                {
-                    nombre: tal_nombre,
-                    descripcion: tal_descripcion,
-                    ubicacion: tal_ubicacion,
-                    docente: tal_docente_encargado,
-                    codigo: codigo
-                },
-                { autoCommit: true }
-            );
-
-            console.log('✅ Taller actualizado exitosamente');
-            res.json({ success: true, message: 'Taller actualizado exitosamente' });
-
-        } catch (err) {
-            console.error('❌ Error actualizando taller:', err.message);
-            res.status(500).json({ success: false, error: err.message });
-        } finally {
-            if (connection) await connection.close();
-        }
-    });
-
-    // DELETE - Eliminar taller
-    router.delete('/:codigo', async (req, res) => {
-        let connection;
-        try {
-            const { codigo } = req.params;
-            connection = await pool.getConnection();
-
-            console.log('🗑️ Eliminando taller:', codigo);
-
-            await connection.execute(
-                `DELETE FROM TALLERES WHERE TAL_CODIGO = :codigo`,
-                { codigo },
-                { autoCommit: true }
-            );
-
-            console.log('✅ Taller eliminado exitosamente');
-            res.json({ success: true, message: 'Taller eliminado exitosamente' });
-
-        } catch (err) {
-            console.error('❌ Error eliminando taller:', err.message);
-            res.status(500).json({ success: false, error: err.message });
-        } finally {
-            if (connection) await connection.close();
-        }
-    });
-
     // =============================================
-    // RUTAS DE CURSOS
+    // RUTAS DE CURSOS (ANTES de las rutas /:codigo)
     // =============================================
 
     // GET - Listar todos los cursos
@@ -401,15 +305,28 @@ module.exports = (pool) => {
                     GRU_NOMBRE,
                     CUR_CODIGO,
                     GRU_ANIO,
-                    GRU_ESTADO
-                 FROM GRUPOS_TRABAJO
+                    GRU_ESTADO,
+                    (SELECT COUNT(*) 
+                     FROM INTEGRANTES_GRUPO 
+                     WHERE GRU_ID = g.GRU_ID) AS CANTIDAD_INTEGRANTES
+                 FROM GRUPOS_TRABAJO g
                  WHERE CUR_CODIGO = :codigo
                  AND GRU_ESTADO = 'ACTIVO'
                  ORDER BY GRU_NUMERO`,
                 { codigo }
             );
 
-            res.json(result.rows);
+            const grupos = result.rows.map(row => ({
+                gru_id: row.GRU_ID,
+                gru_numero: row.GRU_NUMERO,
+                gru_nombre: row.GRU_NOMBRE,
+                cur_codigo: row.CUR_CODIGO,
+                gru_anio: row.GRU_ANIO,
+                gru_estado: row.GRU_ESTADO,
+                cantidad_integrantes: row.CANTIDAD_INTEGRANTES || 0
+            }));
+
+            res.json(grupos);
 
         } catch (err) {
             console.error('❌ Error obteniendo grupos del curso:', err.message);
@@ -420,7 +337,7 @@ module.exports = (pool) => {
     });
 
     // =============================================
-    // RUTAS DE GRUPOS
+    // RUTAS DE GRUPOS (ANTES de las rutas /:codigo)
     // =============================================
 
     // GET - Listar todos los grupos
@@ -728,6 +645,107 @@ module.exports = (pool) => {
 
         } catch (err) {
             console.error('❌ Error verificando préstamo del grupo:', err.message);
+            res.status(500).json({ success: false, error: err.message });
+        } finally {
+            if (connection) await connection.close();
+        }
+    });
+
+    // =============================================
+    // RUTAS DE TALLERES CON PARÁMETROS (AL FINAL)
+    // =============================================
+
+    // GET - Obtener un taller específico
+    router.get('/:codigo', async (req, res) => {
+        let connection;
+        try {
+            const { codigo } = req.params;
+            connection = await pool.getConnection();
+
+            const result = await connection.execute(
+                `SELECT 
+                    TAL_CODIGO as tal_codigo,
+                    TAL_NOMBRE as tal_nombre,
+                    TAL_DESCRIPCION as tal_descripcion,
+                    TAL_UBICACION as tal_ubicacion,
+                    TAL_DOCENTE_ENCARGADO as tal_docente_encargado
+                 FROM TALLERES
+                 WHERE TAL_CODIGO = :codigo`,
+                { codigo }
+            );
+
+            if (result.rows.length > 0) {
+                res.json(result.rows[0]);
+            } else {
+                res.status(404).json({ success: false, message: 'Taller no encontrado' });
+            }
+
+        } catch (err) {
+            console.error('❌ Error obteniendo taller:', err.message);
+            res.status(500).json({ success: false, error: err.message });
+        } finally {
+            if (connection) await connection.close();
+        }
+    });
+
+    // PUT - Actualizar taller
+    router.put('/:codigo', async (req, res) => {
+        let connection;
+        try {
+            const { codigo } = req.params;
+            const { tal_nombre, tal_descripcion, tal_ubicacion, tal_docente_encargado } = req.body;
+            connection = await pool.getConnection();
+
+            console.log('✏️ Actualizando taller:', codigo);
+
+            await connection.execute(
+                `UPDATE TALLERES
+                 SET TAL_NOMBRE = :nombre,
+                     TAL_DESCRIPCION = :descripcion,
+                     TAL_UBICACION = :ubicacion,
+                     TAL_DOCENTE_ENCARGADO = :docente
+                 WHERE TAL_CODIGO = :codigo`,
+                {
+                    nombre: tal_nombre,
+                    descripcion: tal_descripcion,
+                    ubicacion: tal_ubicacion,
+                    docente: tal_docente_encargado,
+                    codigo: codigo
+                },
+                { autoCommit: true }
+            );
+
+            console.log('✅ Taller actualizado exitosamente');
+            res.json({ success: true, message: 'Taller actualizado exitosamente' });
+
+        } catch (err) {
+            console.error('❌ Error actualizando taller:', err.message);
+            res.status(500).json({ success: false, error: err.message });
+        } finally {
+            if (connection) await connection.close();
+        }
+    });
+
+    // DELETE - Eliminar taller
+    router.delete('/:codigo', async (req, res) => {
+        let connection;
+        try {
+            const { codigo } = req.params;
+            connection = await pool.getConnection();
+
+            console.log('🗑️ Eliminando taller:', codigo);
+
+            await connection.execute(
+                `DELETE FROM TALLERES WHERE TAL_CODIGO = :codigo`,
+                { codigo },
+                { autoCommit: true }
+            );
+
+            console.log('✅ Taller eliminado exitosamente');
+            res.json({ success: true, message: 'Taller eliminado exitosamente' });
+
+        } catch (err) {
+            console.error('❌ Error eliminando taller:', err.message);
             res.status(500).json({ success: false, error: err.message });
         } finally {
             if (connection) await connection.close();

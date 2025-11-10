@@ -32,7 +32,7 @@ function renderTalleresTable() {
         console.error('❌ tbody #talleresTableBody NO encontrado');
         return;
     }
-    
+
     tbody.innerHTML = talleresData.map(taller => `
         <tr>
             <td><strong>${taller.tal_codigo}</strong></td>
@@ -40,13 +40,14 @@ function renderTalleresTable() {
             <td>${taller.tal_descripcion || '-'}</td>
             <td>${taller.tal_ubicacion || '-'}</td>
             <td>
-                ${taller.tal_docente_encargado ? 
-                    `<span class="badge badge-success">${taller.tal_docente_encargado}</span>` : 
-                    `<span class="badge badge-secondary">Por asignar</span>`
-                }
+                ${taller.tal_docente_encargado ?
+            `<span class="badge badge-success">${taller.tal_docente_encargado}</span>` :
+            `<span class="badge badge-secondary">Por asignar</span>`
+        }
             </td>
             <td>
                 <div class="action-btns">
+                    <button class="btn-icon" title="Eliminar" onclick="eliminarTaller('${taller.tal_codigo}')">🗑️</button>
                     <button class="btn-icon" title="Editar" onclick="editarTaller('${taller.tal_codigo}')">✏️</button>
                     <button class="btn-icon" title="Ver detalles" onclick="verTaller('${taller.tal_codigo}')">👁️</button>
                 </div>
@@ -63,10 +64,10 @@ function cargarTalleresEnSelect() {
         console.warn('⚠️ Select #cursoTaller no encontrado');
         return;
     }
-    
+
     // Limpiar opciones existentes excepto la primera
     selectTaller.innerHTML = '<option value="">Seleccione...</option>';
-    
+
     // Agregar cada taller como opción
     talleresData.forEach(taller => {
         const option = document.createElement('option');
@@ -74,7 +75,7 @@ function cargarTalleresEnSelect() {
         option.textContent = `${taller.tal_codigo} - ${taller.tal_nombre}`;
         selectTaller.appendChild(option);
     });
-    
+
     console.log('✅ Select de talleres llenado con', talleresData.length, 'opciones');
 }
 
@@ -85,10 +86,10 @@ function cargarCursosEnSelect() {
         console.warn('⚠️ Select #grupoCurso no encontrado');
         return;
     }
-    
+
     // Limpiar opciones existentes excepto la primera
     selectCurso.innerHTML = '<option value="">Seleccione...</option>';
-    
+
     // Agregar cada curso como opción
     cursosData.forEach(curso => {
         const option = document.createElement('option');
@@ -96,7 +97,7 @@ function cargarCursosEnSelect() {
         option.textContent = `${curso.cur_nivel} ${curso.cur_letra} - ${curso.taller_nombre}`;
         selectCurso.appendChild(option);
     });
-    
+
     console.log('✅ Select de cursos llenado con', cursosData.length, 'opciones');
 }
 
@@ -106,7 +107,7 @@ async function guardarTaller() {
     console.log('═══════════════════════════════════════');
     console.log('🚀 guardarTaller() INICIANDO');
     console.log('═══════════════════════════════════════');
-    
+
     // PASO 1: Buscar elementos
     console.log('📍 PASO 1: Buscando elementos del formulario...');
     const codigoInput = document.getElementById('tallerCodigo');
@@ -114,20 +115,20 @@ async function guardarTaller() {
     const descripcionInput = document.getElementById('tallerDescripcion');
     const ubicacionInput = document.getElementById('tallerUbicacion');
     const docenteInput = document.getElementById('tallerDocente');
-    
+
     console.log('🔍 Resultado búsqueda de elementos:');
     console.log('  - tallerCodigo:', codigoInput ? '✅ ENCONTRADO' : '❌ NULL');
     console.log('  - tallerNombre:', nombreInput ? '✅ ENCONTRADO' : '❌ NULL');
     console.log('  - tallerDescripcion:', descripcionInput ? '✅ ENCONTRADO' : '❌ NULL');
     console.log('  - tallerUbicacion:', ubicacionInput ? '✅ ENCONTRADO' : '❌ NULL');
     console.log('  - tallerDocente:', docenteInput ? '✅ ENCONTRADO' : '❌ NULL');
-    
+
     if (!codigoInput || !nombreInput) {
         console.error('❌ ERROR FATAL: Elementos del formulario no encontrados');
         alert('ERROR: Los campos del formulario no se encontraron en el DOM.\n\nVerifica que los IDs sean correctos.');
         return;
     }
-    
+
     // PASO 2: Leer valores RAW
     console.log('');
     console.log('📍 PASO 2: Leyendo valores RAW de los inputs...');
@@ -136,14 +137,14 @@ async function guardarTaller() {
     const valorDescripcion = descripcionInput ? descripcionInput.value : '';
     const valorUbicacion = ubicacionInput ? ubicacionInput.value : '';
     const valorDocente = docenteInput ? docenteInput.value : '';
-    
+
     console.log('📦 Valores RAW leídos:');
     console.log('  - Código:', JSON.stringify(valorCodigo), '(tipo:', typeof valorCodigo, ')');
     console.log('  - Nombre:', JSON.stringify(valorNombre), '(tipo:', typeof valorNombre, ')');
     console.log('  - Descripción:', JSON.stringify(valorDescripcion), '(tipo:', typeof valorDescripcion, ')');
     console.log('  - Ubicación:', JSON.stringify(valorUbicacion), '(tipo:', typeof valorUbicacion, ')');
     console.log('  - Docente:', JSON.stringify(valorDocente), '(tipo:', typeof valorDocente, ')');
-    
+
     // PASO 3: Procesar valores
     console.log('');
     console.log('📍 PASO 3: Procesando valores (trim)...');
@@ -154,22 +155,22 @@ async function guardarTaller() {
         tal_ubicacion: valorUbicacion.trim(),
         tal_docente_encargado: valorDocente.trim()
     };
-    
+
     console.log('📦 Objeto taller procesado:');
     console.log(JSON.stringify(taller, null, 2));
-    
+
     // PASO 4: Validar
     console.log('');
     console.log('📍 PASO 4: Validando campos obligatorios...');
     console.log('  - Código válido?', taller.tal_codigo ? '✅ SÍ' : '❌ NO (vacío)');
     console.log('  - Nombre válido?', taller.tal_nombre ? '✅ SÍ' : '❌ NO (vacío)');
-    
+
     if (!taller.tal_codigo || !taller.tal_nombre) {
         console.warn('⚠️ Validación FALLÓ: Campos vacíos');
         PanolApp.showToast('Código y Nombre son obligatorios', 'error');
         return;
     }
-    
+
     // PASO 5: Enviar al backend
     console.log('');
     console.log('📍 PASO 5: Preparando envío al backend...');
@@ -177,20 +178,20 @@ async function guardarTaller() {
         const isEdit = talleresData.some(t => t.tal_codigo === taller.tal_codigo);
         const endpoint = isEdit ? `/talleres/${taller.tal_codigo}` : '/talleres';
         const method = isEdit ? 'PUT' : 'POST';
-        
+
         console.log('📡 Configuración de request:');
         console.log('  - Endpoint:', endpoint);
         console.log('  - Method:', method);
         console.log('  - Datos a enviar:', JSON.stringify(taller, null, 2));
-        
+
         console.log('');
         console.log('🔄 Ejecutando PanolApp.fetchAPI()...');
         const response = await PanolApp.fetchAPI(endpoint, method, taller);
-        
+
         console.log('');
         console.log('✅ RESPUESTA DEL SERVIDOR:');
         console.log(JSON.stringify(response, null, 2));
-        
+
         if (response) {
             PanolApp.showToast(`Taller ${isEdit ? 'actualizado' : 'creado'} exitosamente`, 'success');
             PanolApp.closeModal('tallerModal');
@@ -202,7 +203,7 @@ async function guardarTaller() {
         console.error(error);
         PanolApp.showToast('Error al guardar taller', 'error');
     }
-    
+
     console.log('═══════════════════════════════════════');
     console.log('🏁 guardarTaller() FINALIZADO');
     console.log('═══════════════════════════════════════');
@@ -212,14 +213,14 @@ function editarTaller(codigo) {
     console.log('✏️ editarTaller():', codigo);
     const taller = talleresData.find(t => t.tal_codigo === codigo);
     if (!taller) return;
-    
+
     document.getElementById('tallerCodigo').value = taller.tal_codigo;
     document.getElementById('tallerCodigo').readOnly = true;
     document.getElementById('tallerNombre').value = taller.tal_nombre;
     document.getElementById('tallerDescripcion').value = taller.tal_descripcion || '';
     document.getElementById('tallerUbicacion').value = taller.tal_ubicacion || '';
     document.getElementById('tallerDocente').value = taller.tal_docente_encargado || '';
-    
+
     document.querySelector('#tallerModal .modal-title').textContent = 'Editar Taller';
     PanolApp.openModal('tallerModal');
 }
@@ -230,9 +231,9 @@ async function verTaller(codigo) {
         const response = await PanolApp.fetchAPI(`/talleres/${codigo}/estadisticas`);
         if (response) {
             alert(`Estadísticas de ${codigo}:\n` +
-                  `Total Cajas: ${response.total_cajas}\n` +
-                  `Cajas Prestadas: ${response.cajas_prestadas}\n` +
-                  `Items Extraviados: ${response.items_extraviados}`);
+                `Total Cajas: ${response.total_cajas}\n` +
+                `Cajas Prestadas: ${response.cajas_prestadas}\n` +
+                `Items Extraviados: ${response.items_extraviados}`);
         }
     } catch (error) {
         console.error('Error obteniendo detalles:', error);
@@ -246,7 +247,7 @@ async function verTaller(codigo) {
 async function cargarCursos() {
     console.log('📥 cargarCursos() iniciando...');
     try {
-        const response = await PanolApp.fetchAPI('/cursos');
+        const response = await PanolApp.fetchAPI('/talleres/cursos');
         if (response) {
             cursosData = response;
             console.log('✅ Cursos cargados:', cursosData.length);
@@ -262,7 +263,7 @@ async function cargarCursos() {
 function renderCursosTable() {
     const tbody = document.getElementById('cursosTableBody');
     if (!tbody) return;
-    
+
     tbody.innerHTML = cursosData.map(curso => `
         <tr>
             <td><strong>${curso.cur_codigo}</strong></td>
@@ -275,6 +276,8 @@ function renderCursosTable() {
                 <div class="action-btns">
                     <button class="btn-icon" title="Editar" onclick="editarCurso('${curso.cur_codigo}')">✏️</button>
                     <button class="btn-icon" title="Ver grupos" onclick="verGruposCurso('${curso.cur_codigo}')">👥</button>
+                    <button class="btn-icon" title="Ver alumnos" onclick="verAlumnosCurso('${curso.cur_codigo}')">🎓</button>
+                    <button class="btn-icon" title="Eliminar" onclick="eliminarCurso('${curso.cur_codigo}')">🗑️</button>
                 </div>
             </td>
         </tr>
@@ -283,32 +286,32 @@ function renderCursosTable() {
 
 async function guardarCurso() {
     console.log('📚 guardarCurso() iniciando...');
-    
+
     const nivelInput = document.getElementById('cursoNivel');
     const letraInput = document.getElementById('cursoLetra');
     const tallerInput = document.getElementById('cursoTaller');
     const cantidadInput = document.getElementById('cursoCantidadAlumnos');
-    
+
     if (!nivelInput || !letraInput || !tallerInput) {
         console.error('❌ ERROR: Elementos del formulario de curso no encontrados');
         PanolApp.showToast('Error: Elementos del formulario no encontrados', 'error');
         return;
     }
-    
+
     const nivel = nivelInput.value;
     const letra = letraInput.value.trim();
     const tallerCodigo = tallerInput.value;
     const cantidadAlumnos = cantidadInput?.value || 30;
     const anio = new Date().getFullYear();
-    
+
     console.log('📦 Datos del curso:', { nivel, letra, tallerCodigo, cantidadAlumnos });
-    
+
     if (!nivel || !letra || !tallerCodigo) {
         console.warn('⚠️ Validación falló: campos vacíos');
         PanolApp.showToast('Nivel, Letra y Taller son obligatorios', 'error');
         return;
     }
-    
+
     const curso = {
         cur_codigo: `${nivel === 'Tercero Medio' ? '3M' : '4M'}${letra}-${tallerCodigo}`,
         cur_nivel: nivel,
@@ -317,12 +320,12 @@ async function guardarCurso() {
         tal_codigo: tallerCodigo,
         cur_cantidad_alumnos: cantidadAlumnos
     };
-    
+
     console.log('📡 Enviando curso:', curso);
-    
+
     try {
         const response = await PanolApp.fetchAPI('/cursos', 'POST', curso);
-        
+
         if (response) {
             console.log('✅ Curso creado');
             PanolApp.showToast('Curso creado exitosamente', 'success');
@@ -339,7 +342,7 @@ async function guardarCurso() {
 async function crearGruposAutomaticos(curCodigo) {
     console.log('👥 Creando grupos automáticos para:', curCodigo);
     const cantidadGrupos = 10;
-    
+
     for (let i = 1; i <= cantidadGrupos; i++) {
         const grupo = {
             gru_numero: i,
@@ -348,10 +351,10 @@ async function crearGruposAutomaticos(curCodigo) {
             gru_anio: new Date().getFullYear(),
             gru_estado: 'ACTIVO'
         };
-        
+
         await PanolApp.fetchAPI('/grupos', 'POST', grupo);
     }
-    
+
     PanolApp.showToast(`${cantidadGrupos} grupos creados automáticamente`, 'success');
 }
 
@@ -359,12 +362,12 @@ function editarCurso(codigo) {
     console.log('✏️ editarCurso():', codigo);
     const curso = cursosData.find(c => c.cur_codigo === codigo);
     if (!curso) return;
-    
+
     document.getElementById('cursoNivel').value = curso.cur_nivel;
     document.getElementById('cursoLetra').value = curso.cur_letra;
     document.getElementById('cursoTaller').value = curso.tal_codigo;
     document.getElementById('cursoCantidadAlumnos').value = curso.cur_cantidad_alumnos;
-    
+
     document.querySelector('#cursoModal .modal-title').textContent = 'Editar Curso';
     PanolApp.openModal('cursoModal');
 }
@@ -381,7 +384,7 @@ function verGruposCurso(curCodigo) {
 async function cargarGrupos() {
     console.log('📥 cargarGrupos() iniciando...');
     try {
-        const response = await PanolApp.fetchAPI('/grupos');
+        const response = await PanolApp.fetchAPI('/talleres/grupos');
         if (response) {
             gruposData = response;
             console.log('✅ Grupos cargados:', gruposData.length);
@@ -403,7 +406,7 @@ function renderGruposTable() {
         console.error('❌ Container #gruposContainer NO encontrado');
         return;
     }
-    
+
     // Si no hay grupos
     if (!gruposData || gruposData.length === 0) {
         container.innerHTML = `
@@ -414,7 +417,7 @@ function renderGruposTable() {
         `;
         return;
     }
-    
+
     // Agrupar grupos por curso
     const gruposPorCurso = {};
     gruposData.forEach(grupo => {
@@ -428,16 +431,16 @@ function renderGruposTable() {
         }
         gruposPorCurso[cursoKey].grupos.push(grupo);
     });
-    
+
     console.log('📊 Grupos agrupados por curso:', Object.keys(gruposPorCurso).length, 'cursos');
-    
+
     // Generar HTML por secciones
     let html = '';
-    
+
     Object.keys(gruposPorCurso).forEach(cursoKey => {
         const cursoInfo = gruposPorCurso[cursoKey];
         const grupos = cursoInfo.grupos;
-        
+
         html += `
             <div class="curso-section" data-curso="${cursoKey}" style="margin-bottom: 2rem;">
                 <!-- Header del curso -->
@@ -480,15 +483,16 @@ function renderGruposTable() {
                                         </span>
                                     </td>
                                     <td>
-                                        ${grupo.tiene_prestamo ? 
-                                            '<span class="badge badge-success">✓ Con Préstamo</span>' : 
-                                            '<span class="badge badge-secondary">Sin Préstamo</span>'
-                                        }
+                                        ${grupo.tiene_prestamo ?
+                '<span class="badge badge-success">✓ Con Préstamo</span>' :
+                '<span class="badge badge-secondary">Sin Préstamo</span>'
+            }
                                     </td>
                                     <td>
                                         <div class="action-btns">
                                             <button class="btn-icon" title="Ver integrantes" onclick="verIntegrantesGrupo(${grupo.gru_id})">👥</button>
                                             <button class="btn-icon" title="Editar" onclick="editarGrupo(${grupo.gru_id})">✏️</button>
+                                            <button class="btn-icon" title="Desactivar" onclick="eliminarGrupo(${grupo.gru_id})">🗑️</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -499,10 +503,10 @@ function renderGruposTable() {
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
     console.log('✅ Grupos renderizados por curso');
-    
+
     // Configurar búsqueda que funcione en todas las secciones
     configurarBusquedaGrupos();
 }
@@ -511,33 +515,33 @@ function renderGruposTable() {
 function configurarBusquedaGrupos() {
     const searchInput = document.getElementById('searchGrupos');
     if (!searchInput) return;
-    
-    searchInput.addEventListener('input', function(e) {
+
+    searchInput.addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase().trim();
-        
+
         // Obtener todas las filas de grupos
         const grupoRows = document.querySelectorAll('.grupo-row');
         const cursoSections = document.querySelectorAll('.curso-section');
-        
+
         if (!searchTerm) {
             // Mostrar todo si no hay búsqueda
             grupoRows.forEach(row => row.style.display = '');
             cursoSections.forEach(section => section.style.display = '');
             return;
         }
-        
+
         // Filtrar grupos
         grupoRows.forEach(row => {
             const nombre = row.dataset.grupoNombre;
             const numero = row.dataset.grupoNumero;
-            
+
             if (nombre.includes(searchTerm) || numero.includes(searchTerm)) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
             }
         });
-        
+
         // Ocultar secciones de cursos sin grupos visibles
         cursoSections.forEach(section => {
             const visibleRows = section.querySelectorAll('.grupo-row:not([style*="display: none"])');
@@ -552,29 +556,29 @@ function configurarBusquedaGrupos() {
 
 async function guardarGrupo() {
     console.log('👥 guardarGrupo() iniciando...');
-    
+
     const numeroInput = document.getElementById('grupoNumero');
     const nombreInput = document.getElementById('grupoNombre');
     const cursoInput = document.getElementById('grupoCurso');
-    
+
     if (!numeroInput || !nombreInput || !cursoInput) {
         console.error('❌ ERROR: Elementos del formulario de grupo no encontrados');
         PanolApp.showToast('Error: Elementos del formulario no encontrados', 'error');
         return;
     }
-    
+
     const grupoNumero = numeroInput.value;
     const grupoNombre = nombreInput.value.trim();
     const grupoCurso = cursoInput.value;
-    
+
     console.log('📦 Datos del grupo:', { grupoNumero, grupoNombre, grupoCurso });
-    
+
     if (!grupoNumero || !grupoNombre || !grupoCurso) {
         console.warn('⚠️ Validación falló: campos vacíos');
         PanolApp.showToast('Todos los campos son obligatorios', 'error');
         return;
     }
-    
+
     const grupo = {
         gru_numero: grupoNumero,
         gru_nombre: grupoNombre,
@@ -582,12 +586,12 @@ async function guardarGrupo() {
         gru_anio: new Date().getFullYear(),
         gru_estado: 'ACTIVO'
     };
-    
+
     console.log('📡 Enviando grupo:', grupo);
-    
+
     try {
         const response = await PanolApp.fetchAPI('/grupos', 'POST', grupo);
-        
+
         if (response) {
             console.log('✅ Grupo creado');
             PanolApp.showToast('Grupo creado exitosamente', 'success');
@@ -604,10 +608,10 @@ async function verIntegrantesGrupo(grupoId) {
     try {
         const response = await PanolApp.fetchAPI(`/grupos/${grupoId}/integrantes`);
         if (response && response.length > 0) {
-            const integrantes = response.map(i => 
+            const integrantes = response.map(i =>
                 `${i.alu_nombres} ${i.alu_apellidos} ${i.ing_rol === 'RESPONSABLE' ? '(Responsable)' : ''}`
             ).join('\n');
-            
+
             alert(`Integrantes del Grupo:\n\n${integrantes}`);
         } else {
             alert('Este grupo aún no tiene integrantes asignados');
@@ -621,11 +625,11 @@ function editarGrupo(grupoId) {
     console.log('✏️ editarGrupo():', grupoId);
     const grupo = gruposData.find(g => g.gru_id === grupoId);
     if (!grupo) return;
-    
+
     document.getElementById('grupoCurso').value = grupo.cur_codigo;
     document.getElementById('grupoNumero').value = grupo.gru_numero;
     document.getElementById('grupoNombre').value = grupo.gru_nombre;
-    
+
     document.querySelector('#grupoModal .modal-title').textContent = 'Editar Grupo';
     PanolApp.openModal('grupoModal');
 }
@@ -633,9 +637,9 @@ function editarGrupo(grupoId) {
 function filtrarGruposPorCurso(curCodigo) {
     const tbody = document.getElementById('gruposTableBody');
     if (!tbody) return;
-    
+
     const gruposFiltrados = gruposData.filter(g => g.cur_codigo === curCodigo);
-    
+
     tbody.innerHTML = gruposFiltrados.map(grupo => `
         <tr>
             <td>${grupo.gru_numero}</td>
@@ -644,10 +648,10 @@ function filtrarGruposPorCurso(curCodigo) {
             <td>${grupo.taller_nombre}</td>
             <td>${grupo.cantidad_integrantes || 0}/3</td>
             <td>
-                ${grupo.tiene_prestamo ? 
-                    '<span class="badge badge-success">Con Préstamo</span>' : 
-                    '<span class="badge badge-warning">Sin Préstamo</span>'
-                }
+                ${grupo.tiene_prestamo ?
+            '<span class="badge badge-success">Con Préstamo</span>' :
+            '<span class="badge badge-warning">Sin Préstamo</span>'
+        }
             </td>
             <td>
                 <div class="action-btns">
@@ -660,33 +664,129 @@ function filtrarGruposPorCurso(curCodigo) {
 }
 
 // =============================================
+// ELIMINAR - Talleres, Cursos, Grupos
+// =============================================
+
+async function eliminarTaller(codigo) {
+    if (!confirm(`¿Está seguro de eliminar el taller "${codigo}"?\n\n⚠️ Esta acción eliminará también:\n- Todos los cursos asociados\n- Todos los grupos asociados\n\nEsta acción NO se puede deshacer.`)) {
+        return;
+    }
+    
+    try {
+        console.log('🗑️ Eliminando taller:', codigo);
+        
+        const response = await PanolApp.fetchAPI(`/talleres/${codigo}`, 'DELETE');
+        
+        console.log('✅ Respuesta del servidor:', response);
+        
+        if (response && response.success !== false) {
+            console.log('✅ Taller eliminado exitosamente');
+            PanolApp.showToast('Taller eliminado exitosamente', 'success');
+            
+            // Recargar todos los datos
+            console.log('🔄 Recargando datos...');
+            await cargarTalleres();
+            await cargarCursos();
+            await cargarGrupos();
+            console.log('✅ Datos recargados');
+        } else {
+            console.error('❌ Error: respuesta inválida del servidor');
+            PanolApp.showToast('Error al eliminar taller', 'error');
+        }
+
+    } catch (error) {
+        console.error('❌ Error eliminando taller:', error);
+        PanolApp.showToast('Error al eliminar taller. Puede tener cursos asociados.', 'error');
+    }
+}
+
+async function eliminarCurso(codigo) {
+    if (!confirm(`¿Está seguro de eliminar el curso "${codigo}"?\n\n⚠️ Esta acción eliminará también:\n- Todos los grupos asociados\n- Las asignaciones de alumnos\n\nEsta acción NO se puede deshacer.`)) {
+        return;
+    }
+
+    try {
+        console.log('🗑️ Eliminando curso:', codigo);
+        await PanolApp.fetchAPI(`/talleres/cursos/${codigo}`, 'DELETE');
+        PanolApp.showToast('Curso eliminado exitosamente', 'success');
+
+        // Recargar cursos y grupos
+        cargarCursos();
+        cargarGrupos();
+
+    } catch (error) {
+        console.error('❌ Error eliminando curso:', error);
+        PanolApp.showToast('Error al eliminar curso. Puede tener grupos o alumnos asociados.', 'error');
+    }
+}
+
+async function eliminarGrupo(id) {
+    const grupo = gruposData.find(g => g.gru_id === id);
+    const nombreGrupo = grupo ? grupo.gru_nombre : `Grupo ${id}`;
+
+    if (!confirm(`¿Está seguro de desactivar el grupo "${nombreGrupo}"?\n\nEl grupo quedará inactivo pero no se eliminará de la base de datos.`)) {
+        return;
+    }
+
+    try {
+        console.log('🗑️ Desactivando grupo:', id);
+        await PanolApp.fetchAPI(`/talleres/grupos/${id}`, 'DELETE');
+        PanolApp.showToast('Grupo desactivado exitosamente', 'success');
+
+        // Recargar grupos
+        cargarGrupos();
+
+    } catch (error) {
+        console.error('❌ Error desactivando grupo:', error);
+        PanolApp.showToast('Error al desactivar grupo. Puede tener un préstamo activo.', 'error');
+    }
+}
+
+// Función para refrescar todo manualmente
+function recargarTodo() {
+    console.log('🔄 Recargando todos los datos...');
+    cargarTalleres();
+    cargarCursos();
+    cargarGrupos();
+    PanolApp.showToast('Datos actualizados', 'success');
+}
+
+console.log('✅ TALLERES.JS: Archivo cargado completamente');
+
+function verAlumnosCurso(curCodigo) {
+    // Redirigir a la página de alumnos con filtro
+    window.location.href = `alumnos.html?curso=${curCodigo}`;
+}
+
+
+// =============================================
 // INICIALIZACIÓN
 // =============================================
 
 console.log('🔄 TALLERES.JS: Registrando DOMContentLoaded...');
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('');
     console.log('🎬 ═══════════════════════════════════════');
     console.log('🚀 TALLERES.JS: DOMContentLoaded EJECUTÁNDOSE');
     console.log('═══════════════════════════════════════');
-    
+
     // Cargar datos iniciales
     console.log('📊 Cargando datos iniciales...');
     cargarTalleres();
     cargarCursos();
     cargarGrupos();
-    
+
     // Event listeners de formularios
     console.log('');
     console.log('🎯 Buscando formularios...');
-    
+
     const tallerForm = document.getElementById('tallerForm');
     console.log('  - #tallerForm:', tallerForm ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
-    
+
     if (tallerForm) {
         console.log('  - Registrando event listener de submit...');
-        tallerForm.addEventListener('submit', function(e) {
+        tallerForm.addEventListener('submit', function (e) {
             console.log('');
             console.log('⚡ EVENTO SUBMIT CAPTURADO EN #tallerForm');
             e.preventDefault();
@@ -697,43 +797,41 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error('  - ❌ NO SE PUDO REGISTRAR: Formulario no existe');
     }
-    
+
     const cursoForm = document.getElementById('cursoForm');
     console.log('  - #cursoForm:', cursoForm ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
-    
+
     if (cursoForm) {
-        cursoForm.addEventListener('submit', function(e) {
+        cursoForm.addEventListener('submit', function (e) {
             e.preventDefault();
             console.log('⚡ EVENTO SUBMIT CAPTURADO EN #cursoForm');
             guardarCurso();
         });
     }
-    
+
     const grupoForm = document.getElementById('grupoForm');
     console.log('  - #grupoForm:', grupoForm ? '✅ ENCONTRADO' : '❌ NO ENCONTRADO');
-    
+
     if (grupoForm) {
-        grupoForm.addEventListener('submit', function(e) {
+        grupoForm.addEventListener('submit', function (e) {
             e.preventDefault();
             console.log('⚡ EVENTO SUBMIT CAPTURADO EN #grupoForm');
             guardarGrupo();
         });
     }
-    
+
     // Limpiar formularios al abrir modales
     document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === this) {
                 const form = this.querySelector('form');
                 if (form) form.reset();
             }
         });
     });
-    
+
     console.log('');
     console.log('✅ INICIALIZACIÓN COMPLETA');
     console.log('═══════════════════════════════════════');
     console.log('');
 });
-
-console.log('✅ TALLERES.JS: Archivo cargado completamente');
