@@ -191,19 +191,12 @@
                         <label for="alumnoCurso">Curso *</label>
                         <select id="alumnoCurso" required>
                             <option value="">Seleccione...</option>
-                            <option value="3MA-ELEC">3° Medio A - Electrónica</option>
-                            <option value="4MA-ELEC">4° Medio A - Electrónica</option>
-                            <option value="3MB-ELCN">3° Medio B - Electricidad</option>
-                            <option value="4MB-AUTO">4° Medio B - Automatización</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="alumnoGrupo">Grupo</label>
                         <select id="alumnoGrupo">
                             <option value="">Sin asignar</option>
-                            <option value="1">Grupo 1</option>
-                            <option value="2">Grupo 2</option>
-                            <option value="3">Grupo 3</option>
                         </select>
                     </div>
                 </div>
@@ -225,62 +218,6 @@
     </div>
 
     <script src="../assets/js/App.js"></script>
-    <script>
-        function editarAlumno(rut) {
-            console.log('Editar alumno:', rut);
-            // Aquí se cargarían los datos del alumno
-            PanolApp.openModal('alumnoModal');
-            document.querySelector('#alumnoModal .modal-title').textContent = 'Editar Alumno';
-        }
-
-        function aplicarFiltros() {
-            const taller = document.getElementById('filtroTaller').value;
-            const curso = document.getElementById('filtroCurso').value;
-            const estado = document.getElementById('filtroEstado').value;
-            
-            console.log('Aplicando filtros:', { taller, curso, estado });
-            PanolApp.showToast('Filtros aplicados', 'success');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar búsqueda
-            PanolApp.setupTableSearch('searchAlumnos', 'alumnosTable');
-            
-            // Formatear RUT mientras se escribe
-            const rutInput = document.getElementById('alumnoRut');
-            const rutError = document.getElementById('alumnoRutError');
-            
-            rutInput.addEventListener('input', function(e) {
-                e.target.value = PanolApp.formatearRut(e.target.value);
-            });
-
-            // Manejar formulario
-            document.getElementById('alumnoForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const rut = rutInput.value;
-                
-                // Validar RUT
-                if (!PanolApp.validarRut(rut)) {
-                    rutError.style.display = 'block';
-                    rutInput.focus();
-                    return;
-                } else {
-                    rutError.style.display = 'none';
-                }
-                
-                PanolApp.showToast('Alumno guardado exitosamente', 'success');
-                PanolApp.closeModal('alumnoModal');
-                this.reset();
-                
-                // Aquí iría la llamada a la API
-            });
-        });
-
-        
-
-
-    </script>
     <script src="./assets/js/alumnos.js"></script>
 </body>
 </html>

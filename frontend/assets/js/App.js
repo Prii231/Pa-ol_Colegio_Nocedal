@@ -229,7 +229,7 @@ function setupTableSearch(searchInputId, tableId) {
 }
 
 // =============================================
-// VALIDACIÓN DE RUT CHILENO
+// VALIDACIÓN DE RUT CHILENO - CON DEBUGGING
 // =============================================
 
 function validarRut(rut) {
@@ -239,25 +239,37 @@ function validarRut(rut) {
     
     // Validar que rut exista y no sea vacío
     if (!rut || typeof rut !== 'string' || rut.trim() === '') {
+        console.log('❌ FALLO: rut vacío o no es string');
         return false;
     }
+    
+    console.log('✅ PASO 1: rut es string válido');
     
     // Eliminar puntos y guión
     rut = rut.replace(/\./g, '').replace(/-/g, '');
+    console.log('✅ PASO 2: RUT sin formato:', rut);
     
     // Validar longitud mínima
     if (rut.length < 2) {
+        console.log('❌ FALLO: longitud menor a 2');
         return false;
     }
+    
+    console.log('✅ PASO 3: longitud OK');
     
     // Separar número y dígito verificador
     const rutNumero = rut.slice(0, -1);
     const dv = rut.slice(-1).toUpperCase();
     
+    console.log('✅ PASO 4: rutNumero:', rutNumero, '| dv:', dv);
+    
     // Validar que rutNumero contenga solo dígitos
     if (!/^\d+$/.test(rutNumero)) {
+        console.log('❌ FALLO: rutNumero no es numérico');
         return false;
     }
+    
+    console.log('✅ PASO 5: rutNumero es numérico');
     
     // Calcular dígito verificador
     let suma = 0;
@@ -267,6 +279,8 @@ function validarRut(rut) {
         suma += parseInt(rutNumero.charAt(i)) * multiplicador;
         multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
     }
+    
+    console.log('✅ PASO 6: suma calculada:', suma);
     
     const dvEsperado = 11 - (suma % 11);
     let dvCalculado;
@@ -279,7 +293,12 @@ function validarRut(rut) {
         dvCalculado = dvEsperado.toString();
     }
     
-    return dv === dvCalculado;
+    console.log('✅ PASO 7: dvCalculado:', dvCalculado, '| dv ingresado:', dv);
+    
+    const resultado = dv === dvCalculado;
+    console.log(resultado ? '✅ VALIDACIÓN OK' : '❌ VALIDACIÓN FALLÓ - DV NO COINCIDE');
+    
+    return resultado;
 }
 
 function formatearRut(rut) {

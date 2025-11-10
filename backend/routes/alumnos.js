@@ -8,7 +8,7 @@ module.exports = (pool) => {
     // =============================================
     // GET - Listar todos los alumnos
     // =============================================
-    router.get('/alumnos', async (req, res) => {
+    router.get('/', async (req, res) => {
         let connection;
         try {
             connection = await pool.getConnection();
@@ -72,7 +72,7 @@ module.exports = (pool) => {
     // =============================================
     // POST - Crear nuevo alumno
     // =============================================
-    router.post('/alumnos', async (req, res) => {
+    router.post('/', async (req, res) => {
         let connection;
         try {
             const { alu_rut, alu_nombres, alu_apellidos, alu_email, alu_telefono, cur_codigo, alu_anio_ingreso, gru_id } = req.body;
@@ -127,7 +127,7 @@ module.exports = (pool) => {
     // =============================================
     // PUT - Actualizar alumno
     // =============================================
-    router.put('/alumnos/:rut', async (req, res) => {
+    router.put('/:rut', async (req, res) => {
         let connection;
         try {
             const { rut } = req.params;
@@ -172,7 +172,7 @@ module.exports = (pool) => {
     // =============================================
     // PUT - Cambiar estado del alumno
     // =============================================
-    router.put('/alumnos/:rut/estado', async (req, res) => {
+    router.put('/:rut/estado', async (req, res) => {
         let connection;
         try {
             const { rut } = req.params;
@@ -207,7 +207,7 @@ module.exports = (pool) => {
     // =============================================
     // GET - Obtener un alumno específico
     // =============================================
-    router.get('/alumnos/:rut', async (req, res) => {
+    router.get('/:rut', async (req, res) => {
         let connection;
         try {
             const { rut } = req.params;
@@ -258,7 +258,7 @@ module.exports = (pool) => {
     // =============================================
     // GET - Obtener historial de un alumno
     // =============================================
-    router.get('/alumnos/:rut/historial', async (req, res) => {
+    router.get('/:rut/historial', async (req, res) => {
         let connection;
         try {
             const { rut } = req.params;

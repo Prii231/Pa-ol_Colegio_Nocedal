@@ -205,25 +205,29 @@ module.exports = (pool) => {
         let connection;
         try {
             connection = await pool.getConnection();
-
             console.log('📚 Obteniendo cursos...');
 
             const result = await connection.execute(
                 `SELECT 
-                    c.CUR_CODIGO,
-                    c.CUR_NIVEL,
-                    c.CUR_LETRA,
-                    c.CUR_ANIO,
-                    c.TAL_CODIGO,
-                    c.CUR_CANTIDAD_ALUMNOS,
-                    t.TAL_NOMBRE AS TALLER_NOMBRE,
-                    c.CUR_NIVEL || c.CUR_LETRA AS CURSO_NOMBRE
-                 FROM CURSOS c
-                 LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
-                 ORDER BY c.CUR_NIVEL, c.CUR_LETRA`
+                c.CUR_CODIGO,
+                c.CUR_NIVEL,
+                c.CUR_LETRA,
+                c.CUR_ANIO,
+                c.TAL_CODIGO,
+                c.CUR_CANTIDAD_ALUMNOS,
+                t.TAL_NOMBRE AS TALLER_NOMBRE,
+                c.CUR_NIVEL || ' ' || c.CUR_LETRA AS CURSO_NOMBRE,
+                (SELECT COUNT(*) 
+                 FROM GRUPOS_TRABAJO g 
+                 WHERE g.CUR_CODIGO = c.CUR_CODIGO 
+                 AND g.GRU_ESTADO = 'ACTIVO') AS CANTIDAD_GRUPOS
+             FROM CURSOS c
+             LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
+             ORDER BY c.CUR_NIVEL, c.CUR_LETRA`
             );
 
             console.log('✅ Cursos encontrados:', result.rows.length);
+
             const cursos = result.rows.map(row => ({
                 cur_codigo: row.CUR_CODIGO,
                 cur_nivel: row.CUR_NIVEL,
@@ -232,7 +236,8 @@ module.exports = (pool) => {
                 tal_codigo: row.TAL_CODIGO,
                 cur_cantidad_alumnos: row.CUR_CANTIDAD_ALUMNOS,
                 taller_nombre: row.TALLER_NOMBRE,
-                cantidad_grupos: row.CANTIDAD_GRUPOS
+                curso_nombre: row.CURSO_NOMBRE,
+                cantidad_grupos: row.CANTIDAD_GRUPOS || 0
             }));
 
             res.json(cursos);
@@ -420,14 +425,14 @@ module.exports = (pool) => {
 
     // GET - Listar todos los grupos
     router.get('/grupos', async (req, res) => {
-    let connection;
-    try {
-        connection = await pool.getConnection();
-        
-        console.log('👥 Obteniendo grupos...');
-        
-        const result = await connection.execute(
-            `SELECT 
+        let connection;
+        try {
+            connection = await pool.getConnection();
+
+            console.log('👥 Obteniendo grupos...');
+
+            const result = await connection.execute(
+                `SELECT 
                 g.GRU_ID,
                 g.GRU_NUMERO,
                 g.GRU_NOMBRE,
@@ -450,67 +455,67 @@ module.exports = (pool) => {
              LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
              WHERE g.GRU_ESTADO = 'ACTIVO'
              ORDER BY c.CUR_NIVEL, c.CUR_LETRA, g.GRU_NUMERO`
-        );
-        
-        console.log('✅ Grupos encontrados:', result.rows.length);
-        
-        // Convertir claves a minúsculas
-        const grupos = result.rows.map(row => ({
-            gru_id: row.GRU_ID,
-            gru_numero: row.GRU_NUMERO,
-            gru_nombre: row.GRU_NOMBRE,
-            cur_codigo: row.CUR_CODIGO,
-            gru_anio: row.GRU_ANIO,
-            gru_estado: row.GRU_ESTADO,
-            curso_nombre: row.CURSO_NOMBRE,
-            taller_nombre: row.TALLER_NOMBRE,
-            tal_codigo: row.TAL_CODIGO,
-            cantidad_integrantes: row.CANTIDAD_INTEGRANTES || 0,
-            tiene_prestamo: row.TIENE_PRESTAMO === 1
-        }));
-        
-        res.json(grupos);
-        
-    } catch (err) {
-        console.error('❌ Error obteniendo grupos:', err.message);
-        res.status(500).json({ success: false, error: err.message });
-    } finally {
-        if (connection) await connection.close();
-    }
-});
+            );
+
+            console.log('✅ Grupos encontrados:', result.rows.length);
+
+            // Convertir claves a minúsculas
+            const grupos = result.rows.map(row => ({
+                gru_id: row.GRU_ID,
+                gru_numero: row.GRU_NUMERO,
+                gru_nombre: row.GRU_NOMBRE,
+                cur_codigo: row.CUR_CODIGO,
+                gru_anio: row.GRU_ANIO,
+                gru_estado: row.GRU_ESTADO,
+                curso_nombre: row.CURSO_NOMBRE,
+                taller_nombre: row.TALLER_NOMBRE,
+                tal_codigo: row.TAL_CODIGO,
+                cantidad_integrantes: row.CANTIDAD_INTEGRANTES || 0,
+                tiene_prestamo: row.TIENE_PRESTAMO === 1
+            }));
+
+            res.json(grupos);
+
+        } catch (err) {
+            console.error('❌ Error obteniendo grupos:', err.message);
+            res.status(500).json({ success: false, error: err.message });
+        } finally {
+            if (connection) await connection.close();
+        }
+    });
 
     // POST - Crear nuevo grupo
     router.post('/grupos', async (req, res) => {
-    let connection;
-    try {
-        const { gru_numero, gru_nombre, cur_codigo, gru_anio, gru_estado } = req.body;
-        connection = await pool.getConnection();
-        
-        console.log('➕ Creando nuevo grupo:', gru_nombre);
-        
-        await connection.execute(
-            `INSERT INTO GRUPOS_TRABAJO (GRU_ID, GRU_NUMERO, GRU_NOMBRE, CUR_CODIGO, GRU_ANIO, GRU_ESTADO)
+        let connection;
+        try {
+            const { gru_numero, gru_nombre, cur_codigo, gru_anio, gru_estado } = req.body;
+            connection = await pool.getConnection();
+
+            console.log('➕ Creando nuevo grupo:', gru_nombre);
+
+            await connection.execute(
+                `INSERT INTO GRUPOS_TRABAJO (GRU_ID, GRU_NUMERO, GRU_NOMBRE, CUR_CODIGO, GRU_ANIO, GRU_ESTADO)
              VALUES (SEQ_GRUPO.NEXTVAL, :numero, :nombre, :curso, :anio, :estado)`,
-            {
-                numero: gru_numero,
-                nombre: gru_nombre,
-                curso: cur_codigo,
-                anio: gru_anio || new Date().getFullYear(),
-                estado: gru_estado || 'ACTIVO'
-            },
-            { autoCommit: true }
-        );
-        
-        console.log('✅ Grupo creado exitosamente');
-        res.status(201).json({ success: true, message: 'Grupo creado exitosamente' });
-        
-    } catch (err) {
-        console.error('❌ Error creando grupo:', err.message);
-        res.status(500).json({ success: false, error: err.message });
-    } finally {
-        if (connection) await connection.close();
-    }
-});
+                {
+                    numero: gru_numero,
+                    nombre: gru_nombre,
+                    curso: cur_codigo,
+                    anio: gru_anio || new Date().getFullYear(),
+                    estado: gru_estado || 'ACTIVO'
+                },
+                { autoCommit: true }
+            );
+
+            console.log('✅ Grupo creado exitosamente');
+            res.status(201).json({ success: true, message: 'Grupo creado exitosamente' });
+
+        } catch (err) {
+            console.error('❌ Error creando grupo:', err.message);
+            res.status(500).json({ success: false, error: err.message });
+        } finally {
+            if (connection) await connection.close();
+        }
+    });
 
     // GET - Grupos sin préstamo activo
     router.get('/grupos/sin-prestamo', async (req, res) => {

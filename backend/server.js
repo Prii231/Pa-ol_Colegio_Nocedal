@@ -116,7 +116,7 @@ inicializarDB()
         apiRouter.use('/alumnos', require('./routes/alumnos')(pool));
         apiRouter.use('/inventario', require('./routes/inventario')(pool));
         apiRouter.use('/cajas', require('./routes/cajas')(pool));
-        apiRouter.use('/', require('./routes/talleres')(pool));
+        apiRouter.use('/talleres', require('./routes/talleres')(pool));
         apiRouter.use('/reportes', require('./routes/reportes')(pool));
         apiRouter.use('/revision', require('./routes/revision')(pool));
 
