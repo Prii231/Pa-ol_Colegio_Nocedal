@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Talleres y Cursos - Sistema de Pañol Nocedal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -64,7 +68,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <h1 class="page-title">Talleres y Cursos</h1>
-            
+
             <!-- Tabs Container -->
             <div id="talleresTabsContainer">
                 <!-- Pestañas -->
@@ -79,7 +83,8 @@
                     <div class="table-container">
                         <div class="table-header">
                             <h3>Talleres Registrados</h3>
-                            <button class="btn btn-primary" onclick="PanolApp.openModal('tallerModal')">+ Nuevo Taller</button>
+                            <button class="btn btn-primary" onclick="PanolApp.openModal('tallerModal')">+ Nuevo
+                                Taller</button>
                         </div>
                         <table>
                             <thead>
@@ -104,7 +109,7 @@
                     <div class="table-container">
                         <div class="table-header">
                             <h3>Cursos 2025</h3>
-                            <button class="btn btn-primary" onclick="PanolApp.openModal('cursoModal')">+ Nuevo Curso</button>
+                            <button class="btn btn-primary" onclick="abrirModalNuevoCurso()">+ Nuevo Curso</button>
                         </div>
                         <table>
                             <thead>
@@ -131,11 +136,13 @@
                     <div class="table-header" style="margin-bottom: 1.5rem;">
                         <div>
                             <h3 style="margin-bottom: 0.5rem;">Grupos de Trabajo 2025</h3>
-                            <input type="text" id="searchGrupos" placeholder="🔍 Buscar grupo..." class="search-input" style="max-width: 300px;">
+                            <input type="text" id="searchGrupos" placeholder="🔍 Buscar grupo..." class="search-input"
+                                style="max-width: 300px;">
                         </div>
-                        <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo Grupo</button>
+                        <button class="btn btn-primary" onclick="PanolApp.openModal('grupoModal')">+ Nuevo
+                            Grupo</button>
                     </div>
-                    
+
                     <!-- Contenedor de secciones por curso -->
                     <div id="gruposContainer">
                         <!-- Las secciones se generarán dinámicamente aquí -->
@@ -167,18 +174,21 @@
                 </div>
                 <div class="form-group">
                     <label for="tallerDescripcion">Descripción</label>
-                    <textarea id="tallerDescripcion" rows="3" maxlength="200" placeholder="Descripción del taller"></textarea>
+                    <textarea id="tallerDescripcion" rows="3" maxlength="200"
+                        placeholder="Descripción del taller"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="tallerUbicacion">Ubicación</label>
-                    <input type="text" id="tallerUbicacion" maxlength="100" placeholder="Ej: Edificio CAP - Segundo Piso">
+                    <input type="text" id="tallerUbicacion" maxlength="100"
+                        placeholder="Ej: Edificio CAP - Segundo Piso">
                 </div>
                 <div class="form-group">
                     <label for="tallerDocente">Docente Encargado</label>
                     <input type="text" id="tallerDocente" maxlength="100" placeholder="Nombre del docente encargado">
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('tallerModal')">Cancelar</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="PanolApp.closeModal('tallerModal')">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Guardar Taller</button>
                 </div>
             </form>
@@ -193,6 +203,7 @@
                 <button class="close-modal" onclick="PanolApp.closeModal('cursoModal')">×</button>
             </div>
             <form id="cursoForm">
+                <input type="hidden" id="cursoEditCodigo">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cursoNivel">Nivel *</label>
@@ -224,7 +235,8 @@
                     <input type="number" id="cursoCantidadAlumnos" value="30" min="1" max="45">
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('cursoModal')">Cancelar</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="PanolApp.closeModal('cursoModal')">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Guardar Curso</button>
                 </div>
             </form>
@@ -255,7 +267,8 @@
                     <input type="text" id="grupoNombre" placeholder="Ej: Grupo 1 - 3°A Electrónica" maxlength="50">
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="PanolApp.closeModal('grupoModal')">Cancelar</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="PanolApp.closeModal('grupoModal')">Cancelar</button>
                     <button type="submit" class="btn btn-success">Crear Grupo</button>
                 </div>
             </form>
@@ -271,11 +284,12 @@
     <script src="../assets/js/App.js"></script>
     <script>
         // Configurar búsqueda en grupos después de que cargue el DOM
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // La búsqueda ahora se implementa en talleres.js para buscar en todas las secciones
         });
     </script>
     <!-- IMPORTANTE: talleres.js debe cargarse al final para manejar los formularios -->
     <script src="./assets/js/talleres.js"></script>
 </body>
+
 </html>

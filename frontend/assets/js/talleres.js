@@ -49,7 +49,7 @@ function renderTalleresTable() {
                 <div class="action-btns">
                     <button class="btn-icon" title="Eliminar" onclick="eliminarTaller('${taller.tal_codigo}')">🗑️</button>
                     <button class="btn-icon" title="Editar" onclick="editarTaller('${taller.tal_codigo}')">✏️</button>
-                    <button class="btn-icon" title="Ver detalles" onclick="verTaller('${taller.tal_codigo}')">👁️</button>
+                    <button class="btn-icon" title="Ver detalles" onclick="abrirModalVer('${taller.tal_codigo}')">👁️</button>
                 </div>
             </td>
         </tr>
@@ -209,11 +209,19 @@ async function guardarTaller() {
     console.log('═══════════════════════════════════════');
 }
 
+
 function editarTaller(codigo) {
-    console.log('✏️ editarTaller():', codigo);
+    console.log('✏️ editarTaller() (MODO EDICIÓN):', codigo);
     const taller = talleresData.find(t => t.tal_codigo === codigo);
     if (!taller) return;
 
+    // --- LÍNEAS NUEVAS ---
+    const modal = document.getElementById('tallerModal');
+    if (!modal) return;
+    // 1. Asegurarse de que NO esté en modo "ver"
+    modal.classList.remove('modo-ver'); 
+
+    // --- TU CÓDIGO ORIGINAL (Está perfecto) ---
     document.getElementById('tallerCodigo').value = taller.tal_codigo;
     document.getElementById('tallerCodigo').readOnly = true;
     document.getElementById('tallerNombre').value = taller.tal_nombre;
@@ -222,8 +230,38 @@ function editarTaller(codigo) {
     document.getElementById('tallerDocente').value = taller.tal_docente_encargado || '';
 
     document.querySelector('#tallerModal .modal-title').textContent = 'Editar Taller';
-    PanolApp.openModal('tallerModal');
+    
+    // --- LÍNEA NUEVA (Usando la variable del modal) ---
+    PanolApp.openModal(modal.id); // 3. Abrir modal
 }
+
+
+// --- FUNCIÓN NUEVA ---
+function abrirModalVer(codigo) {
+    console.log('👁️ abrirModalVer() (MODO SOLO LECTURA):', codigo);
+    const taller = talleresData.find(t => t.tal_codigo === codigo);
+    if (!taller) return;
+
+    const modal = document.getElementById('tallerModal');
+    if (!modal) return;
+    
+    // 1. AÑADIR LA CLASE "modo-ver"
+    modal.classList.add('modo-ver');
+
+    // 2. Rellenar el formulario
+    document.getElementById('tallerCodigo').value = taller.tal_codigo;
+    document.getElementById('tallerCodigo').readOnly = true;
+    document.getElementById('tallerNombre').value = taller.tal_nombre;
+    document.getElementById('tallerDescripcion').value = taller.tal_descripcion || '';
+    document.getElementById('tallerUbicacion').value = taller.tal_ubicacion || '';
+    document.getElementById('tallerDocente').value = taller.tal_docente_encargado || '';
+
+    document.querySelector('#tallerModal .modal-title').textContent = 'Ver Detalles del Taller';
+    
+    // 3. Abrir modal
+    PanolApp.openModal(modal.id);
+}
+
 
 async function verTaller(codigo) {
     console.log('👁️ verTaller():', codigo);
@@ -287,33 +325,38 @@ function renderCursosTable() {
 async function guardarCurso() {
     console.log('📚 guardarCurso() iniciando...');
 
+    // 1. Obtener todos los inputs, INCLUYENDO EL OCULTO
     const nivelInput = document.getElementById('cursoNivel');
     const letraInput = document.getElementById('cursoLetra');
     const tallerInput = document.getElementById('cursoTaller');
     const cantidadInput = document.getElementById('cursoCantidadAlumnos');
+    const editCodigoInput = document.getElementById('cursoEditCodigo'); // <-- Input oculto clave
 
-    if (!nivelInput || !letraInput || !tallerInput) {
-        console.error('❌ ERROR: Elementos del formulario de curso no encontrados');
-        PanolApp.showToast('Error: Elementos del formulario no encontrados', 'error');
-        return;
-    }
+    // 2. Determinar el modo (Crear vs. Editar)
+    const editCodigo = editCodigoInput ? editCodigoInput.value : '';
+    const esEdicion = (editCodigo !== ""); // true si estamos editando
+    
+    console.log(`Modo de guardado: ${esEdicion ? 'EDICIÓN' : 'CREACIÓN'}`);
+    if(esEdicion) console.log(`Editando código: ${editCodigo}`);
 
+    // 3. Obtener valores del formulario (Tu código original)
     const nivel = nivelInput.value;
     const letra = letraInput.value.trim();
     const tallerCodigo = tallerInput.value;
     const cantidadAlumnos = cantidadInput?.value || 30;
     const anio = new Date().getFullYear();
 
-    console.log('📦 Datos del curso:', { nivel, letra, tallerCodigo, cantidadAlumnos });
-
+    // 4. Validar (Tu código original)
     if (!nivel || !letra || !tallerCodigo) {
         console.warn('⚠️ Validación falló: campos vacíos');
         PanolApp.showToast('Nivel, Letra y Taller son obligatorios', 'error');
         return;
     }
 
+    // 5. Construir el objeto
+    // ¡Importante! El código se genera SÓLO si es nuevo.
     const curso = {
-        cur_codigo: `${nivel === 'Tercero Medio' ? '3M' : '4M'}${letra}-${tallerCodigo}`,
+        cur_codigo: esEdicion ? editCodigo : `${nivel === 'Tercero Medio' ? '3M' : '4M'}${letra}-${tallerCodigo}`,
         cur_nivel: nivel,
         cur_letra: letra,
         cur_anio: anio,
@@ -321,22 +364,65 @@ async function guardarCurso() {
         cur_cantidad_alumnos: cantidadAlumnos
     };
 
-    console.log('📡 Enviando curso:', curso);
+    // 6. Determinar endpoint y método correctos
+    // ¡ESTA ES LA CORRECCIÓN PRINCIPAL!
+    // Usamos las rutas que creamos en 'backend/routes/talleres.js'
+    const endpoint = esEdicion ? `/talleres/cursos/${editCodigo}` : '/talleres/cursos';
+    const method = esEdicion ? 'PUT' : 'POST';
+
+    console.log(`📡 Enviando curso a: ${method} ${endpoint}`);
+    console.log('📦 Datos:', curso);
 
     try {
-        const response = await PanolApp.fetchAPI('/cursos', 'POST', curso);
+        // 7. Llamar a la API
+        const response = await PanolApp.fetchAPI(endpoint, method, curso);
 
         if (response) {
-            console.log('✅ Curso creado');
-            PanolApp.showToast('Curso creado exitosamente', 'success');
+            console.log(`✅ Curso ${esEdicion ? 'actualizado' : 'creado'}`);
+            PanolApp.showToast(`Curso ${esEdicion ? 'actualizado' : 'creado'} exitosamente`, 'success');
+            
             PanolApp.closeModal('cursoModal');
-            cargarCursos();
-            await crearGruposAutomaticos(curso.cur_codigo);
+            
+            // Limpiar el input oculto
+            if(editCodigoInput) editCodigoInput.value = ""; 
+
+            cargarCursos(); // Recargar la tabla
+            
+            // Solo crear grupos si NO es edición
+            if (!esEdicion) { 
+                await crearGruposAutomaticos(curso.cur_codigo);
+            }
         }
     } catch (error) {
         console.error('❌ Error guardando curso:', error);
-        PanolApp.showToast('Error al guardar curso', 'error');
+        // El error 404 ya no debería ocurrir, pero otros sí (ej. ORA-00001 si el código ya existe)
+        PanolApp.showToast(`Error al guardar curso: ${error.message}`, 'error');
     }
+}
+
+function abrirModalNuevoCurso() {
+    console.log('🔄 Preparando modal para "Nuevo Curso"...');
+    
+    // 1. Limpiar el formulario completo
+    const form = document.getElementById('cursoForm');
+    if (form) {
+        form.reset();
+    }
+    
+    // 2. Limpiar el campo oculto (¡El paso clave!)
+    const editCodigoInput = document.getElementById('cursoEditCodigo');
+    if (editCodigoInput) {
+        editCodigoInput.value = ""; 
+    }
+    
+    // 3. Poner el título correcto
+    const modalTitle = document.querySelector('#cursoModal .modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = 'Nuevo Curso';
+    }
+    
+    // 4. Abrir el modal
+    PanolApp.openModal('cursoModal');
 }
 
 async function crearGruposAutomaticos(curCodigo) {
@@ -829,6 +915,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+
+    
 
     console.log('');
     console.log('✅ INICIALIZACIÓN COMPLETA');
