@@ -449,6 +449,16 @@ function editarCurso(codigo) {
     const curso = cursosData.find(c => c.cur_codigo === codigo);
     if (!curso) return;
 
+    // 1. ESTA ES LA LÍNEA CLAVE QUE FALTABA O FALLABA:
+    // Guardamos el código original en el input oculto
+    const hiddenInput = document.getElementById('cursoEditCodigo');
+    if (hiddenInput) {
+        hiddenInput.value = curso.cur_codigo; 
+    } else {
+        console.error("❌ Error: No se encontró el input hidden 'cursoEditCodigo' en el HTML");
+    }
+
+    // 2. Rellenar el resto del formulario
     document.getElementById('cursoNivel').value = curso.cur_nivel;
     document.getElementById('cursoLetra').value = curso.cur_letra;
     document.getElementById('cursoTaller').value = curso.tal_codigo;
@@ -596,6 +606,8 @@ function renderGruposTable() {
     // Configurar búsqueda que funcione en todas las secciones
     configurarBusquedaGrupos();
 }
+
+
 
 // Nueva función para búsqueda en grupos
 function configurarBusquedaGrupos() {

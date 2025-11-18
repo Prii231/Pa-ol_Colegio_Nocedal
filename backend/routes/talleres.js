@@ -109,45 +109,28 @@ module.exports = (pool) => {
         let connection;
         try {
             connection = await pool.getConnection();
-            console.log('📚 Obteniendo cursos...');
 
+            // CORRECCIÓN: Agregamos AS "nombre_en_minuscula" para que el frontend lo lea bien
             const result = await connection.execute(
                 `SELECT 
-                c.CUR_CODIGO,
-                c.CUR_NIVEL,
-                c.CUR_LETRA,
-                c.CUR_ANIO,
-                c.TAL_CODIGO,
-                c.CUR_CANTIDAD_ALUMNOS,
-                t.TAL_NOMBRE AS TALLER_NOMBRE,
-                c.CUR_NIVEL || ' ' || c.CUR_LETRA AS CURSO_NOMBRE,
-                (SELECT COUNT(*) 
-                 FROM GRUPOS_TRABAJO g 
-                 WHERE g.CUR_CODIGO = c.CUR_CODIGO 
-                 AND g.GRU_ESTADO = 'ACTIVO') AS CANTIDAD_GRUPOS
-             FROM CURSOS c
-             LEFT JOIN TALLERES t ON c.TAL_CODIGO = t.TAL_CODIGO
-             ORDER BY c.CUR_NIVEL, c.CUR_LETRA`
+                    c.cur_codigo AS "cur_codigo",
+                    c.cur_nivel AS "cur_nivel",
+                    c.cur_letra AS "cur_letra",
+                    c.cur_cantidad_alumnos AS "cur_cantidad_alumnos",
+                    t.tal_nombre AS "taller_nombre",
+                    t.tal_codigo AS "tal_codigo",
+                    (SELECT COUNT(*) FROM grupos_trabajo g 
+                     WHERE g.cur_codigo = c.cur_codigo 
+                     AND g.gru_estado = 'ACTIVO') AS "cantidad_grupos"
+                 FROM cursos c
+                 INNER JOIN talleres t ON c.tal_codigo = t.tal_codigo
+                 ORDER BY c.cur_codigo`
             );
 
-            console.log('✅ Cursos encontrados:', result.rows.length);
-
-            const cursos = result.rows.map(row => ({
-                cur_codigo: row.CUR_CODIGO,
-                cur_nivel: row.CUR_NIVEL,
-                cur_letra: row.CUR_LETRA,
-                cur_anio: row.CUR_ANIO,
-                tal_codigo: row.TAL_CODIGO,
-                cur_cantidad_alumnos: row.CUR_CANTIDAD_ALUMNOS,
-                taller_nombre: row.TALLER_NOMBRE,
-                curso_nombre: row.CURSO_NOMBRE,
-                cantidad_grupos: row.CANTIDAD_GRUPOS || 0
-            }));
-
-            res.json(cursos);
+            res.json(result.rows);
 
         } catch (err) {
-            console.error('❌ Error obteniendo cursos:', err.message);
+            console.error('Error obteniendo cursos:', err.message);
             res.status(500).json({ success: false, error: err.message });
         } finally {
             if (connection) await connection.close();

@@ -3,6 +3,8 @@
    Página: alumnos.html
    ============================================= */
 
+console.log('🎓 ALUMNOS.JS: Cargando...');
+
 let alumnosData = [];
 let cursosDisponibles = [];
 let gruposDisponibles = [];
@@ -26,10 +28,11 @@ async function cargarAlumnos() {
     }
 }
 
-// Cargar cursos disponibles
+// Cargar cursos disponibles (CORREGIDO: Ruta /talleres/cursos)
 async function cargarCursosDisponibles() {
     try {
-        const response = await PanolApp.fetchAPI('/cursos');
+        // CAMBIO IMPORTANTE: La ruta correcta es /talleres/cursos
+        const response = await PanolApp.fetchAPI('/talleres/cursos');
         if (response) {
             cursosDisponibles = response;
             llenarSelectCursos();
@@ -59,16 +62,27 @@ function llenarSelectCursos() {
     }
 }
 
-// Cargar grupos de un curso
+// Cargar grupos de un curso (CORREGIDO: Filtra en el cliente)
 async function cargarGruposPorCurso(curCodigo) {
+    const selectGrupo = document.getElementById('alumnoGrupo');
+    if (!selectGrupo) return;
+
+    selectGrupo.innerHTML = '<option value="">Cargando...</option>';
+    selectGrupo.disabled = true;
+
     try {
-        const response = await PanolApp.fetchAPI(`/cursos/${curCodigo}/grupos`);
+        // CAMBIO: Pedimos todos los grupos y filtramos aquí
+        const response = await PanolApp.fetchAPI('/talleres/grupos');
+
         if (response) {
-            gruposDisponibles = response;
+            // Filtrar solo los grupos del curso seleccionado
+            gruposDisponibles = response.filter(g => g.cur_codigo === curCodigo);
             llenarSelectGrupos();
+            selectGrupo.disabled = false;
         }
     } catch (error) {
         console.error('Error cargando grupos:', error);
+        selectGrupo.innerHTML = '<option value="">Error al cargar</option>';
     }
 }
 
@@ -76,11 +90,11 @@ async function cargarGruposPorCurso(curCodigo) {
 function llenarSelectGrupos() {
     const selectGrupo = document.getElementById('alumnoGrupo');
     if (selectGrupo) {
-        selectGrupo.innerHTML = '<option value="">Sin asignar</option>' +
+        selectGrupo.innerHTML = '<option value="">Sin asignar (Opcional)</option>' +
             gruposDisponibles.map(grupo => {
                 const integrantes = grupo.cantidad_integrantes || 0;
-                const disponible = integrantes < 3;
-                return `<option value="${grupo.gru_id}" ${!disponible ? 'disabled' : ''}>
+                // Permitimos seleccionar aunque esté lleno por si se está editando un alumno ya perteneciente
+                return `<option value="${grupo.gru_id}">
                     Grupo ${grupo.gru_numero} (${integrantes}/3 integrantes)
                 </option>`;
             }).join('');
@@ -96,12 +110,17 @@ function renderAlumnosTable(alumnos) {
     const tbody = document.getElementById('alumnosTableBody');
     if (!tbody) return;
 
+    if (alumnos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay alumnos registrados</td></tr>';
+        return;
+    }
+
     tbody.innerHTML = alumnos.map(alumno => `
         <tr data-rut="${alumno.alu_rut}">
             <td>${PanolApp.formatearRut(alumno.alu_rut)}</td>
             <td><strong>${alumno.alu_nombres} ${alumno.alu_apellidos}</strong></td>
             <td>${alumno.alu_email || '-'}</td>
-            <td>${alumno.curso_nombre || '-'}</td>
+            <td>${alumno.curso_nombre || '<span class="badge badge-warning">Sin Asignar</span>'}</td>
             <td>${alumno.grupo_nombre || '<span class="badge badge-secondary">Sin grupo</span>'}</td>
             <td>${getEstadoBadge(alumno.alu_estado)}</td>
             <td>
@@ -109,17 +128,12 @@ function renderAlumnosTable(alumnos) {
                     <button class="btn-icon" title="Editar" onclick="editarAlumno('${alumno.alu_rut}')">✏️</button>
                     <button class="btn-icon" title="Ver historial" onclick="verHistorialAlumno('${alumno.alu_rut}')">📄</button>
                     <button class="btn-icon" title="Cambiar grupo" onclick="cambiarGrupoAlumno('${alumno.alu_rut}')">↔️</button>
-                    ${alumno.alu_estado === 'INACTIVO' ?
-            `<button class="btn-icon" title="Reactivar" onclick="cambiarEstadoAlumno('${alumno.alu_rut}', 'ACTIVO')">🔄</button>` :
-            `<button class="btn-icon" title="Desactivar" onclick="cambiarEstadoAlumno('${alumno.alu_rut}', 'INACTIVO')">⏸️</button>`
-        }
                 </div>
             </td>
         </tr>
     `).join('');
 }
 
-// Obtener badge según estado
 function getEstadoBadge(estado) {
     const badges = {
         'ACTIVO': '<span class="badge badge-success">ACTIVO</span>',
@@ -129,7 +143,6 @@ function getEstadoBadge(estado) {
     return badges[estado] || '<span class="badge badge-secondary">-</span>';
 }
 
-// Actualizar estadísticas
 function actualizarEstadisticas() {
     const total = alumnosData.length;
     const activos = alumnosData.filter(a => a.alu_estado === 'ACTIVO').length;
@@ -149,142 +162,83 @@ function actualizarEstadisticas() {
 // CRUD DE ALUMNOS
 // =============================================
 
-// Guardar alumno (crear o actualizar) - CON DEBUGGING
-async function guardarAlumno() {
-    console.log('');
-    console.log('═══════════════════════════════════════');
-    console.log('🔵 guardarAlumno() INICIANDO');
-    console.log('═══════════════════════════════════════');
+// Función unificada para guardar (Crear/Editar)
+async function guardarAlumnoConDatos(formData) {
+    console.log('🔵 guardarAlumnoConDatos() INICIANDO', formData);
 
-    // Leer valores directamente del DOM
-    const rutInput = document.getElementById('alumnoRut');
-    const nombresInput = document.getElementById('alumnoNombres');
-    const apellidosInput = document.getElementById('alumnoApellidos');
-    const emailInput = document.getElementById('alumnoEmail');
-    const telefonoInput = document.getElementById('alumnoTelefono');
-    const cursoInput = document.getElementById('alumnoCurso');
-    const grupoInput = document.getElementById('alumnoGrupo');
-    const anioInput = document.getElementById('alumnoAnioIngreso');
+    const rut = formData.rut;
 
-    console.log('📍 PASO 1: Elementos del DOM encontrados:');
-    console.log('  - rutInput:', rutInput ? '✅' : '❌');
-    console.log('  - nombresInput:', nombresInput ? '✅' : '❌');
-    console.log('  - apellidosInput:', apellidosInput ? '✅' : '❌');
-    console.log('  - cursoInput:', cursoInput ? '✅' : '❌');
-
-    const rut = rutInput ? rutInput.value : null;
-
-    console.log('');
-    console.log('📍 PASO 2: Valores leídos:');
-    console.log('  - rut:', JSON.stringify(rut));
-    console.log('  - nombres:', nombresInput ? JSON.stringify(nombresInput.value) : 'NULL');
-    console.log('  - apellidos:', apellidosInput ? JSON.stringify(apellidosInput.value) : 'NULL');
-    console.log('  - curso:', cursoInput ? JSON.stringify(cursoInput.value) : 'NULL');
-
-    // Validar RUT
-    console.log('');
-    console.log('📍 PASO 3: Validando RUT...');
-    const esValido = PanolApp.validarRut(rut);
-    console.log('  - Resultado validarRut:', esValido);
-    console.log('  - Evaluando: !rut =', !rut, '|| !esValido =', !esValido);
-
-    if (!rut || !esValido) {
-        console.log('');
-        console.log('❌ ERROR: Validación de RUT falló');
-        console.log('   - !rut:', !rut);
-        console.log('   - !esValido:', !esValido);
+    // 1. Validar RUT
+    if (!rut || !PanolApp.validarRut(rut)) {
         PanolApp.showToast('RUT inválido', 'error');
-        const rutError = document.getElementById('alumnoRutError');
-        if (rutError) rutError.style.display = 'block';
         return;
     }
 
-    console.log('✅ Validación RUT pasó');
-
-    const alumno = {
-        alu_rut: rut.replace(/\./g, '').replace(/-/g, ''),
-        alu_nombres: nombresInput ? nombresInput.value : '',
-        alu_apellidos: apellidosInput ? apellidosInput.value : '',
-        alu_email: emailInput ? emailInput.value : null,
-        alu_telefono: telefonoInput ? telefonoInput.value : null,
-        cur_codigo: cursoInput ? cursoInput.value : null,
-        gru_id: grupoInput ? grupoInput.value : null,
-        alu_anio_ingreso: anioInput ? anioInput.value : new Date().getFullYear(),
-        alu_estado: 'ACTIVO'
-    };
-
-    console.log('');
-    console.log('📍 PASO 4: Objeto alumno creado:');
-    console.log(alumno);
-
-    // Validar campos obligatorios
-    console.log('');
-    console.log('📍 PASO 5: Validando campos obligatorios...');
-    console.log('  - alu_nombres:', alumno.alu_nombres ? '✅' : '❌ VACÍO');
-    console.log('  - alu_apellidos:', alumno.alu_apellidos ? '✅' : '❌ VACÍO');
-    console.log('  - cur_codigo:', alumno.cur_codigo ? '✅' : '❌ VACÍO');
-
-    if (!alumno.alu_nombres || !alumno.alu_apellidos || !alumno.cur_codigo) {
-        console.log('');
-        console.log('❌ ERROR: Campos obligatorios vacíos');
+    // 2. Validar Campos Obligatorios (Nombres, Apellidos, Curso)
+    if (!formData.nombres || !formData.apellidos || !formData.curso) {
         PanolApp.showToast('Nombres, Apellidos y Curso son obligatorios', 'error');
         return;
     }
 
-    console.log('✅ Todos los campos OK');
+    // 3. Preparar Objeto Final
+    const alumno = {
+        alu_rut: rut.replace(/\./g, '').replace(/-/g, ''), // Limpiar formato
+        alu_nombres: formData.nombres,
+        alu_apellidos: formData.apellidos,
+        alu_email: formData.email || null,
+        alu_telefono: formData.telefono || null,
+        cur_codigo: formData.curso,
+        gru_id: formData.grupo || null, // Clave para la desasignación: null si está vacío
+        alu_anio_ingreso: formData.anio,
+        alu_estado: 'ACTIVO'
+    };
+
+    // 4. Determinar POST (Nuevo) o PUT (Editar)
+    const existe = alumnosData.some(a => a.alu_rut === alumno.alu_rut);
+    const endpoint = existe ? `/alumnos/${alumno.alu_rut}` : '/alumnos';
+    const method = existe ? 'PUT' : 'POST';
 
     try {
-        console.log('');
-        console.log('📍 PASO 6: Enviando al backend...');
-
-        const existe = alumnosData.some(a => a.alu_rut === alumno.alu_rut);
-        const endpoint = existe ? `/alumnos/${alumno.alu_rut}` : '/alumnos';
-        const method = existe ? 'PUT' : 'POST';
-
-        console.log('  - Existe:', existe);
-        console.log('  - Endpoint:', endpoint);
-        console.log('  - Method:', method);
-
+        // 5. Enviar petición principal (Alumno)
         const response = await PanolApp.fetchAPI(endpoint, method, alumno);
 
         if (response) {
-            console.log('✅ Alumno guardado en backend');
-
-            // Si se asignó a un grupo, registrar en integrantes_grupo
-            if (alumno.gru_id && !existe) {
-                console.log('📍 Asignando a grupo:', alumno.gru_id);
+            // 6. LÓGICA DE ASIGNACIÓN/REMOCIÓN DE GRUPO
+            if (existe) { // Estamos EDITANDO un alumno existente
+                if (alumno.gru_id) {
+                    // Caso A: Tiene grupo, asignamos/actualizamos (UPSERT)
+                    await asignarAlumnoAGrupo(alumno.alu_rut, alumno.gru_id);
+                } else {
+                    // Caso B: El grupo es null ('Sin asignar'), removemos la asignación
+                    await removerAlumnoDeGrupo(alumno.alu_rut);
+                }
+            } else if (alumno.gru_id) { // Si es NUEVO alumno y tiene un grupo
+                // Caso C: Nuevo alumno con grupo
                 await asignarAlumnoAGrupo(alumno.alu_rut, alumno.gru_id);
             }
 
+            // 7. Feedback y recarga
             PanolApp.showToast(`Alumno ${existe ? 'actualizado' : 'registrado'} exitosamente`, 'success');
             PanolApp.closeModal('alumnoModal');
             cargarAlumnos();
-
-            console.log('');
-            console.log('✅ ¡PROCESO COMPLETADO EXITOSAMENTE!');
-            console.log('═══════════════════════════════════════');
         }
     } catch (error) {
-        console.error('');
-        console.error('❌ ERROR EN CATCH:');
-        console.error(error);
-        console.error('═══════════════════════════════════════');
-        PanolApp.showToast('Error al guardar alumno', 'error');
+        console.error('❌ Error:', error);
+        PanolApp.showToast('Error al guardar alumno: ' + error.message, 'error');
     }
 }
 
-// Asignar alumno a grupo
-async function asignarAlumnoAGrupo(aluRut, gruId, esResponsable = false) {
+async function asignarAlumnoAGrupo(aluRut, gruId) {
     try {
         const data = {
             alu_rut: aluRut,
             gru_id: gruId,
-            ing_rol: esResponsable ? 'RESPONSABLE' : 'INTEGRANTE'
+            ing_rol: 'INTEGRANTE'
         };
-
-        await PanolApp.fetchAPI('/grupos/integrantes', 'POST', data);
+        await PanolApp.fetchAPI('/alumnos/grupos/integrantes', 'POST', data);
     } catch (error) {
-        console.error('Error asignando alumno a grupo:', error);
+        console.error('Error asignando grupo:', error);
+        // No mostramos error al usuario para no interrumpir el flujo principal
     }
 }
 
@@ -293,8 +247,9 @@ function editarAlumno(rut) {
     const alumno = alumnosData.find(a => a.alu_rut === rut);
     if (!alumno) return;
 
+    // Rellenar formulario
     document.getElementById('alumnoRut').value = PanolApp.formatearRut(alumno.alu_rut);
-    document.getElementById('alumnoRut').readOnly = true;
+    document.getElementById('alumnoRut').readOnly = true; // No se puede cambiar el RUT al editar
     document.getElementById('alumnoNombres').value = alumno.alu_nombres;
     document.getElementById('alumnoApellidos').value = alumno.alu_apellidos;
     document.getElementById('alumnoEmail').value = alumno.alu_email || '';
@@ -315,32 +270,7 @@ function editarAlumno(rut) {
     PanolApp.openModal('alumnoModal');
 }
 
-// Cambiar estado del alumno
-async function cambiarEstadoAlumno(rut, nuevoEstado) {
-    const mensajes = {
-        'ACTIVO': '¿Desea reactivar este alumno?',
-        'INACTIVO': '¿Desea desactivar este alumno?',
-        'EGRESADO': '¿Desea marcar este alumno como egresado?'
-    };
-
-    if (!confirm(mensajes[nuevoEstado])) return;
-
-    try {
-        const response = await PanolApp.fetchAPI(`/alumnos/${rut}/estado`, 'PUT', {
-            alu_estado: nuevoEstado
-        });
-
-        if (response) {
-            PanolApp.showToast('Estado actualizado exitosamente', 'success');
-            cargarAlumnos();
-        }
-    } catch (error) {
-        console.error('Error cambiando estado:', error);
-        PanolApp.showToast('Error al cambiar estado', 'error');
-    }
-}
-
-// Ver historial del alumno
+// Ver historial
 async function verHistorialAlumno(rut) {
     try {
         const response = await PanolApp.fetchAPI(`/alumnos/${rut}/historial`);
@@ -348,235 +278,150 @@ async function verHistorialAlumno(rut) {
             const historial = response.map(h =>
                 `${PanolApp.formatearFecha(h.fecha)}: ${h.descripcion}`
             ).join('\n');
-
-            alert(`Historial del Alumno:\n\n${historial}`);
+            alert(`Historial:\n\n${historial}`);
         } else {
-            alert('No hay historial registrado para este alumno');
+            alert('No hay historial registrado.');
         }
     } catch (error) {
-        console.error('Error obteniendo historial:', error);
+        console.error(error);
     }
 }
 
-// Cambiar grupo del alumno
+// Cambiar solo el grupo (acceso rápido)
 function cambiarGrupoAlumno(rut) {
-    const alumno = alumnosData.find(a => a.alu_rut === rut);
-    if (!alumno || !alumno.cur_codigo) {
-        PanolApp.showToast('El alumno debe estar asignado a un curso primero', 'warning');
-        return;
-    }
-
-    // Abrir modal con selector de grupos
-    cargarGruposPorCurso(alumno.cur_codigo);
-    PanolApp.showToast('Seleccione el nuevo grupo en el modal', 'info');
     editarAlumno(rut);
+    PanolApp.showToast('Cambie el grupo en el formulario y guarde', 'info');
 }
 
-// Nueva función que recibe los datos como parámetro
-async function guardarAlumnoConDatos(formData) {
-    console.log('');
-    console.log('═══════════════════════════════════════');
-    console.log('🔵 guardarAlumnoConDatos() INICIANDO');
-    console.log('═══════════════════════════════════════');
-    console.log('📦 Datos recibidos:', formData);
-    
-    const rut = formData.rut;
-    
-    // Validar RUT
-    console.log('📍 Validando RUT:', rut);
-    const esValido = PanolApp.validarRut(rut);
-    console.log('  - Resultado:', esValido);
-    
-    if (!rut || !esValido) {
-        console.log('❌ ERROR: RUT inválido');
-        PanolApp.showToast('RUT inválido', 'error');
-        return;
-    }
-    
-    console.log('✅ RUT válido');
-    
-    const alumno = {
-        alu_rut: rut.replace(/\./g, '').replace(/-/g, ''),
-        alu_nombres: formData.nombres,
-        alu_apellidos: formData.apellidos,
-        alu_email: formData.email || null,
-        alu_telefono: formData.telefono || null,
-        cur_codigo: formData.curso,
-        gru_id: formData.grupo || null,
-        alu_anio_ingreso: formData.anio,
-        alu_estado: 'ACTIVO'
-    };
-    
-    console.log('📦 Objeto alumno creado:', alumno);
-    
-    // Validar campos obligatorios
-    if (!alumno.alu_nombres || !alumno.alu_apellidos || !alumno.cur_codigo) {
-        console.log('❌ ERROR: Campos obligatorios vacíos');
-        PanolApp.showToast('Nombres, Apellidos y Curso son obligatorios', 'error');
-        return;
-    }
-    
-    console.log('✅ Validación OK, enviando al backend...');
-    
+// 1. FUNCIÓN QUE REMUEVE EL GRUPO (La que estaba dando el error ReferenceError)
+async function removerAlumnoDeGrupo(aluRut) {
     try {
-        const existe = alumnosData.some(a => a.alu_rut === alumno.alu_rut);
-        const endpoint = existe ? `/alumnos/${alumno.alu_rut}` : '/alumnos';
-        const method = existe ? 'PUT' : 'POST';
-        
-        console.log('  - Endpoint:', endpoint);
-        console.log('  - Method:', method);
-        
-        const response = await PanolApp.fetchAPI(endpoint, method, alumno);
-        
-        if (response) {
-            console.log('✅ Alumno guardado exitosamente');
-            
-            // Si se asignó a un grupo
-            if (alumno.gru_id && !existe) {
-                await asignarAlumnoAGrupo(alumno.alu_rut, alumno.gru_id);
-            }
-            
-            PanolApp.showToast(`Alumno ${existe ? 'actualizado' : 'registrado'} exitosamente`, 'success');
-            PanolApp.closeModal('alumnoModal');
-            cargarAlumnos();
-            
-            // Limpiar formulario
-            document.getElementById('alumnoForm').reset();
-        }
+        console.log('📡 Llamando a DELETE para remover grupo:', aluRut);
+        // Usa la ruta DELETE que implementamos en el backend
+        await PanolApp.fetchAPI(`/alumnos/grupos/integrantes/${aluRut}`, 'DELETE');
     } catch (error) {
-        console.error('❌ Error:', error);
-        PanolApp.showToast('Error al guardar alumno', 'error');
+        console.error('Error removiendo alumno del grupo:', error);
+        // Puedes añadir un PanolApp.showToast si la remoción es crítica
+    }
+}
+// 2. FUNCIÓN QUE ASIGNA/ACTUALIZA EL GRUPO (También es necesaria, ya que se llama en el bloque)
+async function asignarAlumnoAGrupo(aluRut, gruId) {
+    try {
+        const data = {
+            alu_rut: aluRut,
+            gru_id: gruId,
+            ing_rol: 'INTEGRANTE'
+        };
+        // Llama a la ruta POST/UPSERT del backend
+        await PanolApp.fetchAPI('/alumnos/grupos/integrantes', 'POST', data);
+    } catch (error) {
+        console.error('Error asignando grupo:', error);
     }
 }
 
 
+
 // =============================================
-// FILTROS Y BÚSQUEDA
+// FILTROS
 // =============================================
 
-// Aplicar filtros
 function aplicarFiltros() {
     const taller = document.getElementById('filtroTaller').value;
     const curso = document.getElementById('filtroCurso').value;
     const estado = document.getElementById('filtroEstado').value;
 
-    let alumnosFiltrados = [...alumnosData];
+    let filtrados = alumnosData;
 
-    if (taller) {
-        alumnosFiltrados = alumnosFiltrados.filter(a =>
-            a.taller_codigo === taller
-        );
-    }
+    if (taller) filtrados = filtrados.filter(a => a.taller_codigo === taller);
+    if (curso) filtrados = filtrados.filter(a => a.cur_codigo === curso);
+    if (estado) filtrados = filtrados.filter(a => a.alu_estado === estado);
 
-    if (curso) {
-        alumnosFiltrados = alumnosFiltrados.filter(a =>
-            a.cur_codigo === curso
-        );
-    }
-
-    if (estado) {
-        alumnosFiltrados = alumnosFiltrados.filter(a =>
-            a.alu_estado === estado
-        );
-    }
-
-    renderAlumnosTable(alumnosFiltrados);
-    PanolApp.showToast(`${alumnosFiltrados.length} alumnos encontrados`, 'info');
-}
-
-// Limpiar filtros
-function limpiarFiltros() {
-    document.getElementById('filtroTaller').value = '';
-    document.getElementById('filtroCurso').value = '';
-    document.getElementById('filtroEstado').value = '';
-    renderAlumnosTable(alumnosData);
+    renderAlumnosTable(filtrados);
 }
 
 // =============================================
-// INICIALIZACIÓN
+// UTILIDADES Y EVENTOS
 // =============================================
+
+function abrirModalNuevoAlumno() {
+    const form = document.getElementById('alumnoForm');
+    if (form) form.reset();
+
+    // Resetear RUT a editable
+    const rutInput = document.getElementById('alumnoRut');
+    if (rutInput) rutInput.readOnly = false;
+
+    // Resetear select de grupo
+    const grupoSelect = document.getElementById('alumnoGrupo');
+    if (grupoSelect) {
+        grupoSelect.innerHTML = '<option value="">Seleccione un curso primero...</option>';
+        grupoSelect.disabled = true;
+    }
+
+    document.querySelector('#alumnoModal .modal-title').textContent = 'Nuevo Alumno';
+    PanolApp.openModal('alumnoModal');
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('🎓 Módulo de Alumnos cargado');
+    console.log('🎓 Inicializando módulo Alumnos...');
 
-    // Cargar datos iniciales
     cargarAlumnos();
-    cargarCursosDisponibles();
+    cargarCursosDisponibles(); // Llenar select de cursos al inicio
 
-    // Configurar búsqueda en tabla
-    PanolApp.setupTableSearch('searchAlumnos', 'alumnosTable');
-
-    // Event listener del formulario
+    // Configurar formulario
     const alumnoForm = document.getElementById('alumnoForm');
     if (alumnoForm) {
         alumnoForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            e.stopPropagation();
 
-            console.log('🟢 SUBMIT DETECTADO');
-
-            // LEER VALORES INMEDIATAMENTE AQUÍ
             const formData = {
-                rut: document.getElementById('alumnoRut')?.value || '',
-                nombres: document.getElementById('alumnoNombres')?.value || '',
-                apellidos: document.getElementById('alumnoApellidos')?.value || '',
-                email: document.getElementById('alumnoEmail')?.value || '',
-                telefono: document.getElementById('alumnoTelefono')?.value || '',
-                curso: document.getElementById('alumnoCurso')?.value || '',
-                grupo: document.getElementById('alumnoGrupo')?.value || '',
-                anio: document.getElementById('alumnoAnioIngreso')?.value || new Date().getFullYear()
+                rut: document.getElementById('alumnoRut').value,
+                nombres: document.getElementById('alumnoNombres').value,
+                apellidos: document.getElementById('alumnoApellidos').value,
+                email: document.getElementById('alumnoEmail').value,
+                telefono: document.getElementById('alumnoTelefono').value,
+                curso: document.getElementById('alumnoCurso').value,
+                grupo: document.getElementById('alumnoGrupo').value,
+                anio: document.getElementById('alumnoAnioIngreso').value
             };
 
-            console.log('📦 Valores capturados en submit:', formData);
-
-            // Llamar a guardarAlumno pasándole los datos
             await guardarAlumnoConDatos(formData);
         });
     }
 
-    // Formatear RUT mientras se escribe
+    // Formato RUT
     const rutInput = document.getElementById('alumnoRut');
-    const rutError = document.getElementById('alumnoRutError');
-
     if (rutInput) {
         rutInput.addEventListener('input', function (e) {
             e.target.value = PanolApp.formatearRut(e.target.value);
-            if (rutError) rutError.style.display = 'none';
         });
     }
 
-    // Cargar grupos cuando cambia el curso
+    // Cambio de Curso -> Cargar Grupos
     const cursoSelect = document.getElementById('alumnoCurso');
     if (cursoSelect) {
         cursoSelect.addEventListener('change', function (e) {
-            if (e.target.value) {
-                cargarGruposPorCurso(e.target.value);
+            const cursoCodigo = e.target.value;
+            if (cursoCodigo) {
+                cargarGruposPorCurso(cursoCodigo);
             } else {
-                document.getElementById('alumnoGrupo').innerHTML = '<option value="">Sin asignar</option>';
+                const grupoSelect = document.getElementById('alumnoGrupo');
+                grupoSelect.innerHTML = '<option value="">Seleccione un curso primero...</option>';
+                grupoSelect.disabled = true;
             }
         });
     }
 
-    // Limpiar formulario al abrir modal
-    /*const alumnoModal = document.getElementById('alumnoModal');
-    if (alumnoModal) {
-        alumnoModal.addEventListener('click', function (e) {
-            if (e.target === this) {
-                const form = alumnoForm;
-                if (form) {
-                    form.reset();
-                    if (rutInput) rutInput.readOnly = false;
-                    document.querySelector('#alumnoModal .modal-title').textContent = 'Nuevo Alumno';
-                }
-            }
-        });
-    }*/
-
-    // Verificar si viene con parámetro de curso en la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const cursoParam = urlParams.get('curso');
-    if (cursoParam) {
-        document.getElementById('filtroCurso').value = cursoParam;
-        aplicarFiltros();
+    // Función para remover la asignación de grupo
+    async function removerAlumnoDeGrupo(aluRut) {
+        try {
+            console.log('📡 Llamando a DELETE para remover grupo:', aluRut);
+            // Llama al nuevo endpoint DELETE
+            await PanolApp.fetchAPI(`/alumnos/grupos/integrantes/${aluRut}`, 'DELETE');
+        } catch (error) {
+            console.error('Error removiendo alumno del grupo:', error);
+        }
     }
+
+
 });

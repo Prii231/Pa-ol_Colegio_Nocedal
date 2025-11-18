@@ -12,9 +12,9 @@ module.exports = (pool) => {
         let connection;
         try {
             connection = await pool.getConnection();
-            
+
             console.log('👥 Obteniendo alumnos...');
-            
+
             const result = await connection.execute(
                 `SELECT 
                     a.ALU_RUT,
@@ -38,9 +38,9 @@ module.exports = (pool) => {
                  LEFT JOIN GRUPOS_TRABAJO g ON ig.GRU_ID = g.GRU_ID
                  ORDER BY a.ALU_APELLIDOS, a.ALU_NOMBRES`
             );
-            
+
             console.log('✅ Alumnos encontrados:', result.rows.length);
-            
+
             // Convertir a minúsculas
             const alumnos = result.rows.map(row => ({
                 alu_rut: row.ALU_RUT,
@@ -58,9 +58,9 @@ module.exports = (pool) => {
                 grupo_nombre: row.GRUPO_NOMBRE,
                 ing_rol: row.ING_ROL
             }));
-            
+
             res.json(alumnos);
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo alumnos:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -76,11 +76,11 @@ module.exports = (pool) => {
         let connection;
         try {
             const { alu_rut, alu_nombres, alu_apellidos, alu_email, alu_telefono, cur_codigo, alu_anio_ingreso, gru_id } = req.body;
-            
+
             console.log('➕ Creando alumno:', alu_rut);
-            
+
             connection = await pool.getConnection();
-            
+
             // Insertar alumno
             await connection.execute(
                 `INSERT INTO ALUMNOS (ALU_RUT, ALU_NOMBRES, ALU_APELLIDOS, ALU_EMAIL, ALU_TELEFONO, ALU_ESTADO, CUR_CODIGO, ALU_ANIO_INGRESO)
@@ -96,7 +96,7 @@ module.exports = (pool) => {
                 },
                 { autoCommit: false }
             );
-            
+
             // Si se asignó a un grupo, agregar a integrantes
             if (gru_id) {
                 await connection.execute(
@@ -109,12 +109,12 @@ module.exports = (pool) => {
                     { autoCommit: false }
                 );
             }
-            
+
             await connection.commit();
-            
+
             console.log('✅ Alumno creado exitosamente');
             res.status(201).json({ success: true, message: 'Alumno creado exitosamente' });
-            
+
         } catch (err) {
             if (connection) await connection.rollback();
             console.error('❌ Error creando alumno:', err.message);
@@ -132,11 +132,11 @@ module.exports = (pool) => {
         try {
             const { rut } = req.params;
             const { alu_nombres, alu_apellidos, alu_email, alu_telefono, cur_codigo, alu_anio_ingreso } = req.body;
-            
+
             console.log('✏️ Actualizando alumno:', rut);
-            
+
             connection = await pool.getConnection();
-            
+
             await connection.execute(
                 `UPDATE ALUMNOS 
                  SET ALU_NOMBRES = :nombres,
@@ -157,10 +157,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Alumno actualizado');
             res.json({ success: true, message: 'Alumno actualizado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error actualizando alumno:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -177,11 +177,11 @@ module.exports = (pool) => {
         try {
             const { rut } = req.params;
             const { alu_estado } = req.body;
-            
+
             console.log('🔄 Cambiando estado de alumno:', rut, 'a', alu_estado);
-            
+
             connection = await pool.getConnection();
-            
+
             await connection.execute(
                 `UPDATE ALUMNOS 
                  SET ALU_ESTADO = :estado
@@ -192,10 +192,10 @@ module.exports = (pool) => {
                 },
                 { autoCommit: true }
             );
-            
+
             console.log('✅ Estado actualizado');
             res.json({ success: true, message: 'Estado actualizado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error actualizando estado:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -212,7 +212,7 @@ module.exports = (pool) => {
         try {
             const { rut } = req.params;
             connection = await pool.getConnection();
-            
+
             const result = await connection.execute(
                 `SELECT 
                     a.ALU_RUT,
@@ -229,7 +229,7 @@ module.exports = (pool) => {
                  WHERE a.ALU_RUT = :rut`,
                 { rut }
             );
-            
+
             if (result.rows.length > 0) {
                 const alumno = {
                     alu_rut: result.rows[0].ALU_RUT,
@@ -246,7 +246,7 @@ module.exports = (pool) => {
             } else {
                 res.status(404).json({ success: false, message: 'Alumno no encontrado' });
             }
-            
+
         } catch (err) {
             console.error('❌ Error obteniendo alumno:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -263,7 +263,7 @@ module.exports = (pool) => {
         try {
             const { rut } = req.params;
             connection = await pool.getConnection();
-            
+
             // Nota: Esta tabla puede no existir aún
             const result = await connection.execute(
                 `SELECT 
@@ -276,16 +276,16 @@ module.exports = (pool) => {
                  ORDER BY HIS_FECHA DESC`,
                 { rut }
             );
-            
+
             const historial = result.rows.map(row => ({
                 his_id: row.HIS_ID,
                 fecha: row.HIS_FECHA,
                 tipo: row.HIS_TIPO_MOVIMIENTO,
                 descripcion: row.HIS_OBSERVACIONES
             }));
-            
+
             res.json(historial);
-            
+
         } catch (err) {
             // Si la tabla no existe, retornar array vacío
             if (err.message.includes('ORA-00942')) {
@@ -306,24 +306,24 @@ module.exports = (pool) => {
         let connection;
         try {
             const { alu_rut, gru_id, ing_rol } = req.body;
-            
+
             console.log('👥 Asignando alumno a grupo:', { alu_rut, gru_id, ing_rol });
-            
+
             connection = await pool.getConnection();
-            
-            // Verificar si ya existe
+
+            // 1. Verificar si ya existe (buscamos por RUT y GRUPO, no por ID)
             const existe = await connection.execute(
-                `SELECT ING_ID FROM INTEGRANTES_GRUPO 
-                 WHERE ALU_RUT = :rut AND GRU_ID = :gru_id`,
+                `SELECT alu_rut FROM integrantes_grupo 
+                 WHERE alu_rut = :rut AND gru_id = :gru_id`,
                 { rut: alu_rut, gru_id: gru_id }
             );
-            
+
             if (existe.rows.length > 0) {
-                // Actualizar rol
+                // Actualizar rol si ya existe
                 await connection.execute(
-                    `UPDATE INTEGRANTES_GRUPO 
-                     SET ING_ROL = :rol
-                     WHERE ALU_RUT = :rut AND GRU_ID = :gru_id`,
+                    `UPDATE integrantes_grupo 
+                     SET ing_rol = :rol
+                     WHERE alu_rut = :rut AND gru_id = :gru_id`,
                     {
                         rol: ing_rol || 'INTEGRANTE',
                         rut: alu_rut,
@@ -332,10 +332,10 @@ module.exports = (pool) => {
                     { autoCommit: true }
                 );
             } else {
-                // Insertar nuevo
+                // CORRECCIÓN: Insertar SIN 'ING_ID' ni secuencia
                 await connection.execute(
-                    `INSERT INTO INTEGRANTES_GRUPO (ING_ID, ALU_RUT, GRU_ID, ING_ROL)
-                     VALUES (SEQ_INTEGRANTE.NEXTVAL, :rut, :gru_id, :rol)`,
+                    `INSERT INTO integrantes_grupo (alu_rut, gru_id, ing_rol)
+                     VALUES (:rut, :gru_id, :rol)`,
                     {
                         rut: alu_rut,
                         gru_id: gru_id,
@@ -344,10 +344,10 @@ module.exports = (pool) => {
                     { autoCommit: true }
                 );
             }
-            
+
             console.log('✅ Alumno asignado a grupo');
             res.json({ success: true, message: 'Alumno asignado exitosamente' });
-            
+
         } catch (err) {
             console.error('❌ Error asignando alumno a grupo:', err.message);
             res.status(500).json({ success: false, error: err.message });
@@ -355,6 +355,35 @@ module.exports = (pool) => {
             if (connection) await connection.close();
         }
     });
+
+    // =============================================
+    // DELETE - Remover alumno de grupo (al desasignar)
+    // =============================================
+    router.delete('/grupos/integrantes/:rut', async (req, res) => {
+        let connection;
+        try {
+            const { rut } = req.params;
+            console.log('🗑️ Removiendo alumno de grupo:', rut);
+
+            connection = await pool.getConnection();
+
+            // Eliminamos la fila de la tabla de unión
+            await connection.execute(
+                `DELETE FROM integrantes_grupo WHERE alu_rut = :rut`,
+                { rut },
+                { autoCommit: true }
+            );
+
+            res.json({ success: true, message: 'Alumno removido del grupo' });
+        } catch (err) {
+            console.error('❌ Error removiendo alumno del grupo:', err.message);
+            res.status(500).json({ success: false, error: err.message });
+        } finally {
+            if (connection) await connection.close();
+        }
+    });
+
+
 
     return router;
 };
